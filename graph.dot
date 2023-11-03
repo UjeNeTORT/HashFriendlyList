@@ -1,0 +1,45 @@
+digraph list {
+layout=dot
+subgraph cluster_nodes {
+    node_0 [fontname="Helvetica, Arial, sans-serif"  shape = record, label = "{ 0 | data = 0 | <fnext> next = 0 | <fprev> prev = 0 }"];
+    node_1 [fontname="Helvetica, Arial, sans-serif"  shape = record, label = "{ 1 | data = 1 | <fnext> next = 2 | <fprev> prev = 0 }"];
+    node_2 [fontname="Helvetica, Arial, sans-serif"  shape = record, label = "{ 2 | data = 2 | <fnext> next = 3 | <fprev> prev = 1 }"];
+    node_3 [fontname="Helvetica, Arial, sans-serif"  shape = record, label = "{ 3 | data = 3 | <fnext> next = 4 | <fprev> prev = 2 }"];
+    node_4 [fontname="Helvetica, Arial, sans-serif"  shape = record, label = "{ 4 | data = 4 | <fnext> next = 5 | <fprev> prev = 3 }"];
+    node_5 [fontname="Helvetica, Arial, sans-serif"  shape = record, label = "{ 5 | data = 5 | <fnext> next = 6 | <fprev> prev = 4 }"];
+    node_6 [fontname="Helvetica, Arial, sans-serif"  shape = record, label = "{ 6 | data = 6 | <fnext> next = 7 | <fprev> prev = 5 }"];
+    node_7 [fontname="Helvetica, Arial, sans-serif"  shape = record, label = "{ 7 | data = 7 | <fnext> next = 8 | <fprev> prev = 6 }"];
+    node_8 [fontname="Helvetica, Arial, sans-serif"  shape = record, label = "{ 8 | data = 8 | <fnext> next = 9 | <fprev> prev = 7 }"];
+    node_9 [fontname="Helvetica, Arial, sans-serif"  shape = record, label = "{ 9 | data = 9 | <fnext> next = 10 | <fprev> prev = 8 }"];
+    node_10 [fontname="Helvetica, Arial, sans-serif"  shape = record, label = "{ 10 | data = 10 | <fnext> next = 11 | <fprev> prev = 9 }"];
+}
+val_head -> node_1;
+val_tail -> node_1;
+val_fre -> node_1;
+node_0: <fprev> -> node_0: <fprev>;
+node_1: <fprev> -> node_0: <fprev>;
+node_2: <fprev> -> node_1: <fprev>;
+node_3: <fprev> -> node_2: <fprev>;
+node_4: <fprev> -> node_3: <fprev>;
+node_5: <fprev> -> node_4: <fprev>;
+node_6: <fprev> -> node_5: <fprev>;
+node_7: <fprev> -> node_6: <fprev>;
+node_8: <fprev> -> node_7: <fprev>;
+node_9: <fprev> -> node_8: <fprev>;
+node_10: <fprev> -> node_9: <fprev>;
+node_0: <fnext> -> node_0: <fnext>;
+node_1: <fnext> -> node_2: <fnext>;
+node_2: <fnext> -> node_3: <fnext>;
+node_3: <fnext> -> node_4: <fnext>;
+node_4: <fnext> -> node_5: <fnext>;
+node_5: <fnext> -> node_6: <fnext>;
+node_6: <fnext> -> node_7: <fnext>;
+node_7: <fnext> -> node_8: <fnext>;
+node_8: <fnext> -> node_9: <fnext>;
+node_9: <fnext> -> node_10: <fnext>;
+subgraph cluster_val {
+     val_head [ shape = box3d, fontname="Helvetica, Arial, sans-serif"  label = " head
+1 "]      val_tail [ shape = box3d, fontname="Helvetica, Arial, sans-serif"  label = " tail
+1 "]      val_fre  [ shape = box3d, fontname="Helvetica, Arial, sans-serif"  label = " fre
+1 "] }
+}
