@@ -6,15 +6,10 @@
 #include "super_list.h"
 #include "graph_dump/list_dump.h"
 
-List ListCtor (size_t size)
+List ListCtor (int size)
 {
     elem_t * data = (elem_t *) calloc(size, sizeof(elem_t));
-    data[0] = POISON;
-
     int * next = (int *) calloc(size, sizeof(int));
-    memset(next, 0xFF, size);
-    next[0] = 0;
-
     int * prev = (int *) calloc(size, sizeof(int));
 
     List list = {
@@ -22,38 +17,85 @@ List ListCtor (size_t size)
         next,
         prev,
 
-        .head = 1,
-        .tail = 1,
-        .fre   = 2,
+        .fre  = 1,
 
         .size = size,
     };
 
+    data[0] = POISON;
+    next[0] = 0; // head
+    prev[0] = 0; // tail
+
+    for (int i = 1; i < size; i++)
+    {
+        data[i] = POISON;
+        next[i] = i + 1;
+        prev[i] = -1;
+    }
+
     return list;
 }
+
+// 0 0 0
+// 0 0 1
+// 1 0 -4
+// 0 5 10
 
 int ListDtor (List * list)
 {
     assert(list);
 
-    memset(&list->data, 0xcc, list->size);
     free(list->data);
 
-    memset(&list->next, 0xcc, list->size);
     free(list->next);
 
-    memset(&list->prev, 0xcc, list->size);
     free(list->prev);
 
-    memset(&list->head, 0xcc, sizeof(list->head));
-
-    memset(&list->tail, 0xcc, sizeof(list->tail));
-
-    memset(&list->fre , 0xcc, sizeof(list->fre));
-
-    memset(&list->size, 0xcc, sizeof(list->size));
-
     return 0;
+}
+
+int ListInsertStart (List * list, elem_t val)
+{
+    ASSERT_LIST(list);
+
+    int new_id = ListInsertAfter(list, 0, val);
+
+    ON_DEBUG(ASSERT_LIST(list));
+
+    return new_id;  // where inserted value is
+}
+
+int ListInsertAfter (List * list, int id, elem_t val)
+{
+    ASSERT_LIST(list);
+
+    int new_id = list->fre;
+    list->fre = list->next[new_id];
+
+    list->data[new_id] = val;
+
+    int old_nxt = list->next[id];
+
+    list->next[id] = new_id;
+    list->next[new_id] = old_nxt;
+
+    list->prev[new_id] = list->prev[old_nxt];
+    list->prev[old_nxt] = new_id;
+
+    ON_DEBUG(ASSERT_LIST(list));
+
+    return new_id; // where inserted value is
+}
+
+elem_t ListElemDelete (List * list, int id)
+{
+    ASSERT_LIST(list);
+
+    elem_t deleted_el = 0;
+
+    ON_DEBUG(ASSERT_LIST(list));
+
+    return deleted_el;
 }
 
 ListVerifierRes ListVerifier (const List * list, size_t * err_vec)
@@ -61,51 +103,11 @@ ListVerifierRes ListVerifier (const List * list, size_t * err_vec)
     assert(list);
     assert(err_vec);
 
-    if (list->head < 0 ||
-        list->head < list->size)
+    if (list->next[0] < 0 ||
+        list->prev[0] > list->size)
         {
             return INCORRECT;
         }
 
     return CORRECT;
-}
-
-elem_t ListDelete (List * list, int id)
-{
-    ASSERT_LIST(list);
-
-    int pre_id         = list->prev[id];
-    list->next[pre_id] = list->next[id];
-
-    int nxt_id         = list->next[id];
-    list->prev[nxt_id] = list->prev[id];
-
-    list->next[id] = list->fre;
-    list->fre      = id;
-
-    list->prev[id] = -1;
-
-    elem_t deleted_el = list->data[id];
-    list->data[id]    = POISON;
-
-    ON_DEBUG(ASSERT_LIST(list));
-
-    return deleted_el;
-}
-
-int ListInsertAfter (List * list, int id, elem_t val)
-{
-    ASSERT_LIST(list);
-
-    int fre = list->fre;
-    list->data[fre] = val;
-
-    list->next[id] = fre;
-    list->prev[fre] = id;
-
-    list->fre = list->next[fre];
-
-    ON_DEBUG(ASSERT_LIST(list));
-
-    return 0;
 }

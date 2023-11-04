@@ -33,18 +33,17 @@ struct List {
     int * next;
     int * prev;
 
-    int head;
-    int tail;
     int fre;
 
-    size_t size;
+    int size;
 };
 
 ListVerifierRes ListVerifier (const List * list, size_t * err_vec);
-List            ListCtor     (size_t size);
+List            ListCtor     (int size);
 int             ListDtor     (List * list);
 
+int    ListInsertStart (List * list, elem_t val);
 int    ListInsertAfter (List * list, int id, elem_t val);
-elem_t ListDelete      (List * list, int id);
+elem_t ListElemDelete  (List * list, int id);
 
 #endif // SUPER_LIST_H
