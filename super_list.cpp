@@ -36,11 +36,6 @@ List ListCtor (int size)
     return list;
 }
 
-// 0 0 0
-// 0 0 1
-// 1 0 -4
-// 0 5 10
-
 int ListDtor (List * list)
 {
     assert(list);
@@ -52,6 +47,27 @@ int ListDtor (List * list)
     free(list->prev);
 
     return 0;
+}
+
+
+int ListValFind (List * list, elem_t val)
+{
+    ASSERT_LIST(list);
+
+    int id = -1; // not found
+
+    for (int i = list->next[0]; i != 0; i = list->next[i])
+    {
+        if (list->data[i] == val)
+        {
+            id = i;
+            break;
+        }
+    }
+
+    ON_DEBUG(ASSERT_LIST(list));
+
+    return id;
 }
 
 int ListInsertStart (List * list, elem_t val)
@@ -87,15 +103,40 @@ int ListInsertAfter (List * list, int id, elem_t val)
     return new_id; // where inserted value is
 }
 
-elem_t ListElemDelete (List * list, int id)
+elem_t ListValDelete   (List * list, int val)
+{
+
+}
+
+elem_t ListIdDelete (List * list, int id)
 {
     ASSERT_LIST(list);
 
-    elem_t deleted_el = 0;
+    int prev = list->prev[id];
+    int next = list->next[id];
+
+    list->next[prev] = next;
+    list->prev[next] = prev;
+
+    elem_t deleted_el = list->data[id];
+    list->data[id] = POISON;
+
+    list->prev[id] = -1;
+    list->next[id] = list->fre;
+    list->fre = id;
 
     ON_DEBUG(ASSERT_LIST(list));
 
     return deleted_el;
+}
+
+//! unfinished
+int MegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToListFindVal (List * list, elem_t val)
+{
+    assert(list);
+
+
+    return 0;
 }
 
 ListVerifierRes ListVerifier (const List * list, size_t * err_vec)

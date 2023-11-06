@@ -3,36 +3,60 @@ rankdir = LR
 subgraph cluster_nodes_846930886 {
     node_0 [fontname="Helvetica, Arial, sans-serif"style=rounded
 color = green
- shape = record, label = " 0 | data = 13634846 | <fnext> next = 2 | <fprev> prev = 1 "];
+ shape = record, label = " 0 | data = 13634846 | <fnext> next = 6 | <fprev> prev = 3 "];
     node_1 [fontname="Helvetica, Arial, sans-serif"style=rounded
 color = green
- shape = record, label = " 1 | data = 666 | <fnext> next = 0 | <fprev> prev = 2 "];
+ shape = record, label = " 1 | data = 444 | <fnext> next = 2 | <fprev> prev = 4 "];
     node_2 [fontname="Helvetica, Arial, sans-serif"style=rounded
 color = green
- shape = record, label = " 2 | data = 333 | <fnext> next = 1 | <fprev> prev = 0 "];
+ shape = record, label = " 2 | data = 555 | <fnext> next = 3 | <fprev> prev = 1 "];
     node_3 [fontname="Helvetica, Arial, sans-serif"style=rounded
 color = green
- shape = record, label = " 3 | data = 13634846 | <fnext> next = 4 | <fprev> prev = -1 "];
+ shape = record, label = " 3 | data = 666 | <fnext> next = 0 | <fprev> prev = 2 "];
     node_4 [fontname="Helvetica, Arial, sans-serif"style=rounded
 color = green
- shape = record, label = " 4 | data = 13634846 | <fnext> next = 5 | <fprev> prev = -1 "];
+ shape = record, label = " 4 | data = 333 | <fnext> next = 1 | <fprev> prev = 5 "];
+    node_5 [fontname="Helvetica, Arial, sans-serif"style=rounded
+color = green
+ shape = record, label = " 5 | data = 222 | <fnext> next = 4 | <fprev> prev = 6 "];
+    node_6 [fontname="Helvetica, Arial, sans-serif"style=rounded
+color = green
+ shape = record, label = " 6 | data = 111 | <fnext> next = 5 | <fprev> prev = 0 "];
+    node_7 [fontname="Helvetica, Arial, sans-serif"style=rounded
+color = green
+ shape = record, label = " 7 | data = 13634846 | <fnext> next = 8 | <fprev> prev = -1 "];
+    node_8 [fontname="Helvetica, Arial, sans-serif"style=rounded
+color = green
+ shape = record, label = " 8 | data = 13634846 | <fnext> next = 9 | <fprev> prev = -1 "];
+    node_9 [fontname="Helvetica, Arial, sans-serif"style=rounded
+color = green
+ shape = record, label = " 9 | data = 13634846 | <fnext> next = 10 | <fprev> prev = -1 "];
 }
-val_fre -> node_3;
-node_0: <fnext> -> node_2: <fnext> [color = blue];
-node_1: <fnext> -> node_0: <fnext> [color = blue];
-node_2: <fnext> -> node_1: <fnext> [color = blue];
-node_3: <fnext> -> node_4: <fnext> [color = blue];
-node_4: <fnext> -> node_5: <fnext> [color = blue];
-node_0: <fprev> -> node_1: <fprev> [color = red];
-node_1: <fprev> -> node_2: <fprev> [color = red];
-node_2: <fprev> -> node_0: <fprev> [color = red];
+val_fre -> node_7;
+node_0: <fnext> -> node_6: <fnext> [color = blue];
+node_1: <fnext> -> node_2: <fnext> [color = blue];
+node_2: <fnext> -> node_3: <fnext> [color = blue];
+node_3: <fnext> -> node_0: <fnext> [color = blue];
+node_4: <fnext> -> node_1: <fnext> [color = blue];
+node_5: <fnext> -> node_4: <fnext> [color = blue];
+node_6: <fnext> -> node_5: <fnext> [color = blue];
+node_7: <fnext> -> node_8: <fnext> [color = blue];
+node_8: <fnext> -> node_9: <fnext> [color = blue];
+node_9: <fnext> -> node_10: <fnext> [color = blue];
+node_0: <fprev> -> node_3: <fprev> [color = red];
+node_1: <fprev> -> node_4: <fprev> [color = red];
+node_2: <fprev> -> node_1: <fprev> [color = red];
+node_3: <fprev> -> node_2: <fprev> [color = red];
+node_4: <fprev> -> node_5: <fprev> [color = red];
+node_5: <fprev> -> node_6: <fprev> [color = red];
+node_6: <fprev> -> node_0: <fprev> [color = red];
 subgraph cluster_val {
      val_fre  [ shape = box3d, fontname="Helvetica, Arial, sans-serif", label = " fre
-3 "];
+7 "];
 }
 bgcolor="lightblue"
 subgraph cluster_add_info_1804289383{
-node_add_info [shape = plaintext, label = " Sun Nov  5 00:03:54 2023
+node_add_info [shape = plaintext, label = " Mon Nov  6 10:12:22 2023
  "];
 }
 }
