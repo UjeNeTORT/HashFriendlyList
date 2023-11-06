@@ -68,7 +68,7 @@ int    ListValFind     (List * list, elem_t val);
  * @return -1 if "val" not found in the list
  *
 */
-int    MegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToListFindVal (List * list, elem_t val);
+int    MegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToListValDelete (List * list, elem_t val);
 
 /**
  * @brief insert "val" in the beginning of the list (to pos fre)

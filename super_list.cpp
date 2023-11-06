@@ -131,7 +131,7 @@ elem_t ListIdDelete (List * list, int id)
 }
 
 //! unfinished
-int MegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToListFindVal (List * list, elem_t val)
+int MegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToListValDelete (List * list, elem_t val)
 {
     assert(list);
 
