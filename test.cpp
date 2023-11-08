@@ -58,12 +58,12 @@ int main()
     ListInsertStart(&lst_1, 222);
     ListInsertStart(&lst_1, 111);
 
-    int aboba = ListValFind(&lst_1, 666);
-    printf("id = %d\n", aboba);
+    List lst = ListLinear(&lst_1);
 
-    ListDump("graph.dot", &lst_1, 0);
+    ListDump("graph.dot", &lst, 0);
 
     ListDtor(&lst_1);
+    ListDtor(&lst);
 
     return 0;
 }
