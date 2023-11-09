@@ -77,12 +77,6 @@ char * FormVals (const List * list, size_t size)
     sprintf(vals, "subgraph cluster_val {\n%n", &symbs);
     vals += symbs;
 
-    // sprintf(vals, "     val_head [ shape = box3d, %s, label = \" head\n%d \"];\n%n", style, list->head, &symbs);
-    // vals += symbs;
-
-    // sprintf(vals, "     val_tail [ shape = box3d, %s, label = \" tail\n%d \"];\n%n", style, list->tail, &symbs);
-    // vals += symbs;
-
     sprintf(vals, "     val_fre  [ shape = box3d, %s, label = \" fre\n%d \"];\n%n", style, list->fre, &symbs);
     vals += symbs;
 
@@ -117,7 +111,7 @@ char * FormNodes (const List * list, size_t size)
         sprintf(nodes, "    node_%d [%s shape = record, label = \" %d | data = %d | <fnext> next = %d | <fprev> prev = %d \"];\n%n", i, style, i, list->data[i], list->next[i], list->prev[i], &symbs);
         nodes += symbs;
     }
-    printf("yo\n");
+
     sprintf(nodes, "}\n%n", &symbs);
     nodes += symbs;
 

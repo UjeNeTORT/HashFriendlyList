@@ -6,8 +6,13 @@
 #include "super_list.h"
 #include "graph_dump/list_dump.h"
 
-static elem_t* ListDataCopy (List * list);
+typedef enum {
+    SWP_NO_ERR = 0,
+    SWP_ERR    = 1,
+} ListSwapRes;
 
+static elem_t*         ListDataCopy  (List * list);
+static ListSwapRes     ListElemSwap  (List * list, int id_1, int id_2);
 static ListReallocRes  ListReallocUp (List * list, int new_size);
 
 List ListCtor (int size)
@@ -109,6 +114,7 @@ ListReallocRes ListRealloc  (List * list, int new_size)
     return ret_val;
 }
 
+//! not finished
 static ListReallocRes
 ListReallocUp (List * list, int new_size)
 {
@@ -119,19 +125,19 @@ ListReallocUp (List * list, int new_size)
         return REALLC_ERR;
     }
 
-    list->data = (elem_t *) realloc(&list->data, new_size * sizeof(elem_t));
+    list->data = (elem_t *) realloc(list->data, new_size * sizeof(elem_t));
     if (!list->data)
     {
         return REALLC_ERR;
     }
 
-    list->next = (int *) realloc(&list->next, new_size * sizeof(int));
+    list->next = (int *) realloc(list->next, new_size * sizeof(int));
     if (!list->next)
     {
         return REALLC_ERR;
     }
 
-    list->prev = (int *) realloc(&list->prev, new_size * sizeof(int));
+    list->prev = (int *) realloc(list->prev, new_size * sizeof(int));
     if (!list->prev)
     {
         return REALLC_ERR;
@@ -140,7 +146,7 @@ ListReallocUp (List * list, int new_size)
 
     for (int i = 0; i < new_size; i++)
     {
-
+        ;
     }
 
     list->size = new_size;
@@ -150,28 +156,21 @@ ListReallocUp (List * list, int new_size)
     return REALLC_NO_ERR;
 }
 
-// todo i dont want to create new list in order to make this one linear
 // ! not finished
 int ListMakeLinear (List * list)
 {
     ASSERT_LIST(list);
 
-    List linear_list = ListCtor(list->size); //? create fresh list of the same size
+    int curr_el = 0;
+    int logic_id = 1;
 
-    int next_id  = 0;
-    int logic_id = 0;
-
-    while (next_id != list->prev[0])
+    while (curr_el != list->prev[0])
     {
-        next_id = list->next[next_id];
-
-        ListInsertAfter(&linear_list, logic_id, list->data[next_id]);
+        curr_el = list->next[curr_el];
+        ListElemSwap(list, curr_el, logic_id);
         logic_id++;
+        return 0;
     }
-
-    ListDtor(list); //? good solution?
-
-    list = &linear_list;
 
     ON_DEBUG(ASSERT_LIST(list));
 
@@ -343,4 +342,55 @@ static elem_t* ListDataCopy (List * list)
     }
 
     return data_copy;
+}
+
+static ListSwapRes
+ListElemSwap  (List * list, int id_1, int id_2)
+{
+    // no list checks as they would slow down performance of list
+
+    if (id_1 == 0 || id_2 == 0)
+    {
+        fprintf(stderr, "ListElemSwap: elem id == 0 - forbidden\n");
+
+        return SWP_ERR;
+    }
+
+    if (list->prev[id_1] == -1 || list->prev[id_2] == -1)
+    {
+        fprintf(stderr, "ListElemSwap: one of ids \"points\" to a non-used list element\n");
+
+        return SWP_ERR;
+    }
+
+    if (id_1 == id_2)
+    {
+        return SWP_NO_ERR;
+    }
+
+    int next_id_1 = list->next[id_1];
+    int prev_id_1 = list->prev[id_1];
+
+    int next_id_2 = list->next[id_2];
+    int prev_id_2 = list->prev[id_2];
+
+    elem_t temp_el = list->data[id_1];
+    list->data[id_1] = list->data[id_2];
+    list->data[id_2] = temp_el;
+
+    list->next[prev_id_1] = id_2;
+    list->prev[next_id_1] = id_2;
+
+    int temp_nxt = list->next[id_1];
+    list->next[id_1] = list->next[id_2];
+    list->next[id_2] = temp_nxt;
+
+    list->next[prev_id_2] = id_1;
+    list->prev[next_id_2] = id_1;
+
+    int temp_prv = list->prev[id_1];
+    list->prev[id_1] = list->prev[id_2];
+    list->prev[id_2] = temp_prv;
+
+    return SWP_NO_ERR;
 }
