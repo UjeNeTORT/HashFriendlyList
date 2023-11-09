@@ -174,6 +174,8 @@ int ListMakeLinear (List * list)
 
     memcpy(next_tmp, list->next, list->size * sizeof(int));
 
+    ListElemSwap(list, 2, 4);
+    return 0;
     while (*next_tmp != tail)
     {
 
@@ -385,23 +387,25 @@ ListElemSwap  (List * list, int id_1, int id_2)
         return SWP_NO_ERR;
     }
 
-    NEXT(PREV(id_1)) = id_2;
-    PREV(NEXT(id_1)) = id_2;
+    if (PREV(id_2) == id_1)
+    {
+        int temp_id = id_1;
+        id_1 = id_2;
+        id_2 = temp_id;
+    }
 
     NEXT(PREV(id_2)) = id_1;
-    PREV(NEXT(id_2)) = id_1;
+    PREV(NEXT(id_1)) = id_2;
+
+    PREV(id_1) = PREV(id_2);
+    NEXT(id_2) = NEXT(id_1);
+
+    NEXT(id_1) = id_2;
+    PREV(id_2) = id_1;
 
     elem_t temp_data = DATA(id_1);
-    list->data[id_1] = list->data[id_2];
-    list->data[id_2] = temp_data;
-
-    int temp_next = list->next[id_1];
-    list->next[id_1] = list->next[id_2];
-    list->next[id_2] = temp_next;
-
-    int temp_prev = list->prev[id_1];
-    list->prev[id_1] = list->prev[id_2];
-    list->prev[id_2] = temp_prev;
+    DATA(id_1) = DATA(id_2);
+    DATA(id_2) = temp_data;
 
     return SWP_NO_ERR;
 }

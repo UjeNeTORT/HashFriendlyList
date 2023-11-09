@@ -43,7 +43,8 @@ char * FormDotCode (const List * list, size_t err_vec, const char * add_info)
 
     sprintf(dot_code, "digraph list_%d {\n"
                       "rankdir = LR\n"
-
+                    //   "\tsplines = ortho;\n"
+                      "\tedge[minlen = 1.5, penwidth = 1.5];\n"
                       "%s"
                       "%s"
                       "%s"
@@ -146,7 +147,7 @@ char * FormEdges (const List * list, size_t size)
 
     for (int i = 0; i < list->size; i++, symbs = 0)
     {
-        sprintf(edges, "node_%d: <fnext> -> node_%d: <fnext> [color = blue];\n%n", i, list->next[i], &symbs);
+        sprintf(edges, "node_%d -> node_%d  [color = blue];\n%n", i, list->next[i], &symbs);
         edges += symbs;
     }
 
@@ -154,7 +155,7 @@ char * FormEdges (const List * list, size_t size)
     {
         if (list->prev[i] != -1)
         {
-            sprintf(edges, "node_%d: <fprev> -> node_%d: <fprev> [color = red];\n%n", i, list->prev[i], &symbs);
+            sprintf(edges, "node_%d -> node_%d  [color = red];\n%n", i, list->prev[i], &symbs);
             edges += symbs;
         }
     }

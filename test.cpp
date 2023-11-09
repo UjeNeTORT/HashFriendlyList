@@ -44,13 +44,6 @@ int main()
 
     List lst_1 = ListCtor(10);
 
-    int id_1 = ListInsertStart(&lst_1, 666);
-    int id_2 = ListInsertAfter(&lst_1, id_1, 333);
-    int id_3 = ListInsertAfter(&lst_1, id_2, 444);
-    int el_1 = ListIdDelete(&lst_1, id_1);
-    int el_2 = ListIdDelete(&lst_1, id_2);
-    int el_3 = ListIdDelete(&lst_1, id_3);
-
     ListInsertStart(&lst_1, 666);
     ListInsertStart(&lst_1, 555);
     ListInsertStart(&lst_1, 444);
@@ -58,7 +51,7 @@ int main()
     ListInsertStart(&lst_1, 222);
     ListInsertStart(&lst_1, 111);
 
-    // ListMakeLinear(&lst_1);
+    ListMakeLinear(&lst_1);
 
     ListDump("graph.dot", &lst_1, 0);
 
