@@ -79,6 +79,9 @@ ListCopyRes     ListCopy     (List * list_dst, const List * list_src);
 
 ListReallocRes  ListRealloc   (List * list, int new_size);
 
+/**
+ * @note NOT OPTIMAL, SLOW ONE
+*/
 int             ListMakeLinear   (List * list); // if user needs to store both linear and non linear list, they should make copy by themselves
 
 /**

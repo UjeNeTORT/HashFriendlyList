@@ -99,6 +99,7 @@ ListReallocRes ListRealloc  (List * list, int new_size)
 
     if (new_size > list->size)
     {
+        ListMakeLinear(list);
         ListReallocRes ret_val = ListReallocUp(list, new_size);
     }
     else if (new_size < list->size)
@@ -148,7 +149,6 @@ ListReallocUp (List * list, int new_size)
         return REALLC_ERR;
     }
 
-
     for (int i = 0; i < new_size; i++)
     {
         ;
@@ -161,30 +161,27 @@ ListReallocUp (List * list, int new_size)
     return REALLC_NO_ERR;
 }
 
-// ! not finished
 int ListMakeLinear (List * list)
 {
     ASSERT_LIST(list);
 
-    int curr_el = 0;
-    int logic_id = 1;
-    int tail     = list->prev[0];
+    List linear_list = ListCtor(list->size); //? create fresh list of the same size
 
-    int * next_tmp = (int *) calloc(list->size, sizeof(int));
+    int next_id  = 0;
+    int logic_id = 0;
 
-    memcpy(next_tmp, list->next, list->size * sizeof(int));
-
-    ListElemSwap(list, 2, 4);
-    return 0;
-    while (*next_tmp != tail)
+    while (next_id != list->prev[0])
     {
+        next_id = list->next[next_id];
 
-        ListElemSwap(list, *next_tmp, logic_id);
+        ListInsertAfter(&linear_list, logic_id, list->data[next_id]);
 
-        next_tmp++;
+        logic_id++;
     }
 
-    free(next_tmp);
+    ListDtor(list); //? good solution?
+
+    list = &linear_list;
 
     ON_DEBUG(ASSERT_LIST(list));
 
@@ -363,49 +360,3 @@ static elem_t* ListDataCopy (List * list)
     return data_copy;
 }
 
-static ListSwapRes
-ListElemSwap  (List * list, int id_1, int id_2)
-{
-    // no list checks as they would slow down performance of list
-
-    if (id_1 == 0 || id_2 == 0)
-    {
-        fprintf(stderr, "ListElemSwap: elem id == 0 - forbidden\n");
-
-        return SWP_ERR;
-    }
-
-    if (list->prev[id_1] == -1 || list->prev[id_2] == -1)
-    {
-        fprintf(stderr, "ListElemSwap: one of ids \"points\" to a non-used list element\n");
-
-        return SWP_ERR;
-    }
-
-    if (id_1 == id_2)
-    {
-        return SWP_NO_ERR;
-    }
-
-    if (PREV(id_2) == id_1)
-    {
-        int temp_id = id_1;
-        id_1 = id_2;
-        id_2 = temp_id;
-    }
-
-    NEXT(PREV(id_2)) = id_1;
-    PREV(NEXT(id_1)) = id_2;
-
-    PREV(id_1) = PREV(id_2);
-    NEXT(id_2) = NEXT(id_1);
-
-    NEXT(id_1) = id_2;
-    PREV(id_2) = id_1;
-
-    elem_t temp_data = DATA(id_1);
-    DATA(id_1) = DATA(id_2);
-    DATA(id_2) = temp_data;
-
-    return SWP_NO_ERR;
-}
