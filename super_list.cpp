@@ -8,6 +8,8 @@
 
 static elem_t* ListDataCopy (List * list);
 
+static ListReallocRes  ListReallocUp (List * list, int new_size);
+
 List ListCtor (int size)
 {
     elem_t * data = (elem_t *) calloc(size, sizeof(elem_t));
@@ -51,27 +53,110 @@ int ListDtor (List * list)
     return 0;
 }
 
-List* ListRealloc  (List * list, int new_size)
+ListCopyRes ListCopy (List * list_dst, const List * list_src)
 {
-    ASSERT_LIST(list);
+    ASSERT_LIST(list_src);
 
-    if (new_size > list->size)
-        //ListReallocUp
-    if(new_size < )
-    List realloced_list = ListLinear(list);
+    if (!memcpy(list_dst->data, list_src->data, list_src->size * sizeof(elem_t)))
+    {
+        return CPY_ERR_MEMCPY;
+    }
 
+    if (!memcpy(list_dst->next, list_src->next, list_src->size * sizeof(int)))
+    {
+        return CPY_ERR_MEMCPY;
+    }
 
+    if (!memcpy(list_dst->prev, list_src->prev, list_src->size * sizeof(int)))
+    {
+        return CPY_ERR_MEMCPY;
+    }
 
+    list_dst->fre = list_src->fre;
 
+    ON_DEBUG(ASSERT_LIST(list_dst));
 
-    ON_DEBUG(ASSERT_LIST(list));
+    return CPY_NO_ERR;
 }
 
-List ListLinear (List * list)
+//! not finished
+// user should understand that realloc calls ListMakeLinear inside
+ListReallocRes ListRealloc  (List * list, int new_size)
 {
     ASSERT_LIST(list);
 
-    List linear_list = ListCtor(list->size); // create fresh list of the same size
+    ListReallocRes ret_val = REALLC_NO_ERR;
+
+    if (new_size > list->size)
+    {
+        ListReallocRes ret_val = ListReallocUp(list, new_size);
+    }
+    else if (new_size < list->size)
+    {
+        ListMakeLinear(list); // * reallocation down is not yet implemented so it just makes list linear and returns "forbidden"
+
+        ret_val = REALLC_FORBIDDEN;
+    }
+    else if (new_size == list->size)
+    {
+        ListMakeLinear(list);
+
+        ret_val = REALLC_FORBIDDEN;
+    }
+
+    ON_DEBUG(ASSERT_LIST(list));
+
+    return ret_val;
+}
+
+static ListReallocRes
+ListReallocUp (List * list, int new_size)
+{
+    ASSERT_LIST(list);
+
+    if (new_size <= list->size)
+    {
+        return REALLC_ERR;
+    }
+
+    list->data = (elem_t *) realloc(&list->data, new_size * sizeof(elem_t));
+    if (!list->data)
+    {
+        return REALLC_ERR;
+    }
+
+    list->next = (int *) realloc(&list->next, new_size * sizeof(int));
+    if (!list->next)
+    {
+        return REALLC_ERR;
+    }
+
+    list->prev = (int *) realloc(&list->prev, new_size * sizeof(int));
+    if (!list->prev)
+    {
+        return REALLC_ERR;
+    }
+
+
+    for (int i = 0; i < new_size; i++)
+    {
+
+    }
+
+    list->size = new_size;
+
+    ON_DEBUG(ASSERT_LIST(list));
+
+    return REALLC_NO_ERR;
+}
+
+// todo i dont want to create new list in order to make this one linear
+// ! not finished
+int ListMakeLinear (List * list)
+{
+    ASSERT_LIST(list);
+
+    List linear_list = ListCtor(list->size); //? create fresh list of the same size
 
     int next_id  = 0;
     int logic_id = 0;
@@ -84,9 +169,13 @@ List ListLinear (List * list)
         logic_id++;
     }
 
+    ListDtor(list); //? good solution?
+
+    list = &linear_list;
+
     ON_DEBUG(ASSERT_LIST(list));
 
-    return linear_list;
+    return 0;
 }
 
 elem_t ListIdFind (List * list, int id)
@@ -219,6 +308,7 @@ int ListValDelete (List * list, elem_t val)
     return id;
 }
 
+//! not finished
 ListVerifierRes ListVerifier (const List * list, size_t * err_vec)
 {
     assert(err_vec);
@@ -240,6 +330,7 @@ ListVerifierRes ListVerifier (const List * list, size_t * err_vec)
     return CORRECT;
 }
 
+// ! not finished
 static elem_t* ListDataCopy (List * list)
 {
     ASSERT_LIST(list);

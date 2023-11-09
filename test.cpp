@@ -58,12 +58,14 @@ int main()
     ListInsertStart(&lst_1, 222);
     ListInsertStart(&lst_1, 111);
 
-    List lst = ListLinear(&lst_1);
+    List lst_1_cpy = ListCtor(lst_1.size);
 
-    ListDump("graph.dot", &lst, 0);
+    ListMakeLinear(&lst_1);
+
+    ListDump("graph.dot", &lst_1, 0);
 
     ListDtor(&lst_1);
-    ListDtor(&lst);
+    ListDtor(&lst_1_cpy);
 
     return 0;
 }

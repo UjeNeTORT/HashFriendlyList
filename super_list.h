@@ -26,9 +26,20 @@ const int POISON = 0xD00D1E;
 typedef int elem_t;
 
 typedef enum {
-    CORRECT = 0,
+    CORRECT   = 0,
     INCORRECT = 1,
 } ListVerifierRes;
+
+typedef enum {
+    CPY_NO_ERR     = 0,
+    CPY_ERR_MEMCPY = 1,
+} ListCopyRes;
+
+typedef enum {
+    REALLC_NO_ERR    = 0,
+    REALLC_FORBIDDEN = 1,
+    REALLC_ERR       = 2,
+} ListReallocRes;
 
 struct List {
 
@@ -44,8 +55,22 @@ struct List {
 ListVerifierRes ListVerifier (const List * list, size_t * err_vec);
 List            ListCtor     (int size);
 int             ListDtor     (List * list);
-List*           ListRealloc  (List * list, int new_size);
-List            ListLinear   (List * list);
+
+/**
+ * @brief copy everything from list_src to list_dst
+ *
+ * @details container for list_dst is to be created manually outside the function
+ *
+ * @param list_dst destination list to which we copy
+ * @param list_src source list from which we copy
+ *
+ * @return ListCopyRes (0 - if ok, not 0 - if there were errors inside)
+*/
+ListCopyRes     ListCopy     (List * list_dst, const List * list_src);
+
+ListReallocRes  ListRealloc   (List * list, int new_size);
+
+int             ListMakeLinear   (List * list); // if user needs to store both linear and non linear list, they should make copy by themselves
 
 /**
  * @brief get value stored in list->data[id]

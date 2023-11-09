@@ -37,7 +37,9 @@ char * FormDotCode (const List * list, size_t err_vec, const char * add_info)
                    "");
 
     char * vals  = (char *) FormVals(list, size);
+    printf("hello\n");
     char * nodes = (char *) FormNodes(list, size);
+    printf("hellont\n");
     char * edges = (char *) FormEdges(list, size);
     char * rank  = (char *) FormSameRank(list, size);
 
@@ -115,7 +117,7 @@ char * FormNodes (const List * list, size_t size)
         sprintf(nodes, "    node_%d [%s shape = record, label = \" %d | data = %d | <fnext> next = %d | <fprev> prev = %d \"];\n%n", i, style, i, list->data[i], list->next[i], list->prev[i], &symbs);
         nodes += symbs;
     }
-
+    printf("yo\n");
     sprintf(nodes, "}\n%n", &symbs);
     nodes += symbs;
 
@@ -189,7 +191,6 @@ char * FormSameRank (const List * list, size_t size)
     same_rank += symbs;
 
     return same_rank_init;
-
 }
 
 int WriteDotCode (const char * fname, const char * dot_code)
