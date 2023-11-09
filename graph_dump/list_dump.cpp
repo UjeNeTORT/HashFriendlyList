@@ -36,15 +36,14 @@ char * FormDotCode (const List * list, size_t err_vec, const char * add_info)
     sprintf(style, "bgcolor=\"lightblue\"\n"
                    "");
 
-    char * vals  = (char *) FormVals(list, size);
-    printf("hello\n");
-    char * nodes = (char *) FormNodes(list, size);
-    printf("hellont\n");
-    char * edges = (char *) FormEdges(list, size);
-    char * rank  = (char *) FormSameRank(list, size);
+    char * vals  = FormVals     (list, size);
+    char * nodes = FormNodes    (list, size);
+    char * edges = FormEdges    (list, size);
+    char * rank  = FormSameRank (list, size);
 
     sprintf(dot_code, "digraph list_%d {\n"
                       "rankdir = LR\n"
+
                       "%s"
                       "%s"
                       "%s"
@@ -139,6 +138,11 @@ char * FormEdges (const List * list, size_t size)
 
     sprintf(edges, "val_fre -> node_%d;\n%n", list->fre, &symbs);
     edges += symbs;
+
+    for (int i = 0; i < list->size - 1; i++) {
+        sprintf(edges, "\tnode_%d -> node_%d[weight = 100, style = invis];\n %n", i, i + 1, &symbs);
+        edges += symbs;
+    }
 
     for (int i = 0; i < list->size; i++, symbs = 0)
     {

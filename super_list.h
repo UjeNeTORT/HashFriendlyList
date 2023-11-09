@@ -19,7 +19,7 @@
         fprintf(stderr, "List corrupted\n");                         \
         abort();                                                     \
     }                                                                \
-}                                                                    \
+}
 
 const int POISON = 0xD00D1E;
 
@@ -41,7 +41,16 @@ typedef enum {
     REALLC_ERR       = 2,
 } ListReallocRes;
 
+struct ListNode
+{
+    elem_t data;
+    int next;
+    int prev;
+};
+
 struct List {
+
+    // ListNode[]
 
     elem_t * data;
     int * next;

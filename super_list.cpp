@@ -6,6 +6,11 @@
 #include "super_list.h"
 #include "graph_dump/list_dump.h"
 
+#define NEXT(index) list->next[(index)]
+#define PREV(index) list->prev[(index)]
+#define DATA(index) list->data[(index)]
+
+
 typedef enum {
     SWP_NO_ERR = 0,
     SWP_ERR    = 1,
@@ -163,14 +168,21 @@ int ListMakeLinear (List * list)
 
     int curr_el = 0;
     int logic_id = 1;
+    int tail     = list->prev[0];
 
-    while (curr_el != list->prev[0])
+    int * next_tmp = (int *) calloc(list->size, sizeof(int));
+
+    memcpy(next_tmp, list->next, list->size * sizeof(int));
+
+    while (*next_tmp != tail)
     {
-        curr_el = list->next[curr_el];
-        ListElemSwap(list, curr_el, logic_id);
-        logic_id++;
-        return 0;
+
+        ListElemSwap(list, *next_tmp, logic_id);
+
+        next_tmp++;
     }
+
+    free(next_tmp);
 
     ON_DEBUG(ASSERT_LIST(list));
 
@@ -236,6 +248,9 @@ int ListInsertEnd (List * list, elem_t val)
 }
 
 
+#define NEXT(indx) list->next[indx]
+
+// phys_indx
 int ListInsertAfter (List * list, int id, elem_t val)
 {
     ASSERT_LIST(list);
@@ -245,6 +260,7 @@ int ListInsertAfter (List * list, int id, elem_t val)
 
     list->data[new_id] = val;
 
+    // old_next
     int old_nxt = list->next[id];
 
     list->next[id] = new_id;
@@ -324,6 +340,7 @@ ListVerifierRes ListVerifier (const List * list, size_t * err_vec)
         *err_vec |= 2;
     }
 
+    // return !!err_vec;
     if (!err_vec)   return INCORRECT;
 
     return CORRECT;
@@ -368,29 +385,23 @@ ListElemSwap  (List * list, int id_1, int id_2)
         return SWP_NO_ERR;
     }
 
-    int next_id_1 = list->next[id_1];
-    int prev_id_1 = list->prev[id_1];
+    NEXT(PREV(id_1)) = id_2;
+    PREV(NEXT(id_1)) = id_2;
 
-    int next_id_2 = list->next[id_2];
-    int prev_id_2 = list->prev[id_2];
+    NEXT(PREV(id_2)) = id_1;
+    PREV(NEXT(id_2)) = id_1;
 
-    elem_t temp_el = list->data[id_1];
+    elem_t temp_data = DATA(id_1);
     list->data[id_1] = list->data[id_2];
-    list->data[id_2] = temp_el;
+    list->data[id_2] = temp_data;
 
-    list->next[prev_id_1] = id_2;
-    list->prev[next_id_1] = id_2;
-
-    int temp_nxt = list->next[id_1];
+    int temp_next = list->next[id_1];
     list->next[id_1] = list->next[id_2];
-    list->next[id_2] = temp_nxt;
+    list->next[id_2] = temp_next;
 
-    list->next[prev_id_2] = id_1;
-    list->prev[next_id_2] = id_1;
-
-    int temp_prv = list->prev[id_1];
+    int temp_prev = list->prev[id_1];
     list->prev[id_1] = list->prev[id_2];
-    list->prev[id_2] = temp_prv;
+    list->prev[id_2] = temp_prev;
 
     return SWP_NO_ERR;
 }

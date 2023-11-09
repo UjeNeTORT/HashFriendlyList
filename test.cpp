@@ -58,7 +58,7 @@ int main()
     ListInsertStart(&lst_1, 222);
     ListInsertStart(&lst_1, 111);
 
-    ListMakeLinear(&lst_1);
+    // ListMakeLinear(&lst_1);
 
     ListDump("graph.dot", &lst_1, 0);
 
