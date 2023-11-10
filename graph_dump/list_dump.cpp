@@ -43,7 +43,6 @@ char * FormDotCode (const List * list, size_t err_vec, const char * add_info)
 
     sprintf(dot_code, "digraph list_%d {\n"
                       "rankdir = LR\n"
-                    //   "\tsplines = ortho;\n"
                       "\tedge[minlen = 1.5, penwidth = 1.5];\n"
                       "%s"
                       "%s"
@@ -131,24 +130,23 @@ char * FormEdges (const List * list, size_t size)
 
     char * style = (char *) calloc(STYLE_TAG_SIZE, sizeof(char));
 
-    // sprintf(edges, "val_head -> node_%d;\n%n", list->head, &symbs);
-    // edges += symbs;
-
-    // sprintf(edges, "val_tail -> node_%d;\n%n", list->tail, &symbs);
-    // edges += symbs;
-
     sprintf(edges, "val_fre -> node_%d;\n%n", list->fre, &symbs);
     edges += symbs;
 
+    // invisible arrows to align graph elems
     for (int i = 0; i < list->size - 1; i++) {
         sprintf(edges, "\tnode_%d -> node_%d[weight = 100, style = invis];\n %n", i, i + 1, &symbs);
         edges += symbs;
     }
 
+    // next arrows
     for (int i = 0; i < list->size; i++, symbs = 0)
     {
-        sprintf(edges, "node_%d -> node_%d  [color = blue];\n%n", i, list->next[i], &symbs);
-        edges += symbs;
+        if (list->next[i] != -1)
+        {
+            sprintf(edges, "node_%d -> node_%d  [color = blue];\n%n", i, list->next[i], &symbs);
+            edges += symbs;
+        }
     }
 
     for (int i = 0; i < list->size; i++, symbs = 0)

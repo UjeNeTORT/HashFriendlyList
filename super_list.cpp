@@ -17,7 +17,7 @@
 #define VERIFY_ID(list, id)      \
 {                                \
     if (ListVerifyId(list, id))  \
-        abort();                 \
+        ABORT_LIST(list, -1);    \
 }
 
 // DSL
@@ -93,7 +93,7 @@ List ListCtor (int size)
     return list;
 }
 
-int ListDtor (List * list)
+int ListDtor (const List * list)
 {
     assert(list);
 
@@ -306,6 +306,13 @@ int ListInsertAfter (List * list, int id, elem_t val)
     VERIFY_LIST(list);
     VERIFY_ID(list, id);
 
+    if (list->fre == -1)
+    {
+        // if no room left - abort
+        fprintf(stderr, "ListInsertAfter: no room left for insertion\n");
+        ABORT_LIST(list, -1);
+    }
+
     int new_id = list->fre;
     list->fre = NEXT(new_id);
 
@@ -375,7 +382,6 @@ int ListValDelete (List * list, elem_t val)
     return id;
 }
 
-//! not finished
 size_t ListVerifier (const List * list)
 {
     size_t err_vec = 0;
@@ -425,6 +431,20 @@ size_t ListVerifier (const List * list)
         if (PREV(i) == -1)
         {
             err_vec |= LST_ERR_FRE_PREV;
+        }
+    }
+
+    if (list->fre <= 0 || list->fre > list->size)
+    {
+        if (list->fre == -1)
+        {
+            return err_vec;
+        }
+        else
+        {
+            err_vec |= LST_ERR_FRE;
+
+            return err_vec; // because further we adress fre, which is incorrect
         }
     }
 

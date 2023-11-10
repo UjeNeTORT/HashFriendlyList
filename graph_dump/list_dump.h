@@ -12,6 +12,7 @@ typedef enum {
     LST_ERR_HEAD_TAIL      = 16,
     LST_ERR_CHAIN          = 32,
     LST_ERR_FRE_PREV       = 64,
+    LST_ERR_FRE            = 128,
 } ERRORS_LIST;
 
 const char * const DUMP_FNAME = "list_dump.svg";

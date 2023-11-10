@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include "microhashlib/my_hash.h"
 
+const char * const DOT_DUMP_FILENAME = "graph.dot";
+
 // #define LINEARIZATION
 
 #define DEBUG
@@ -13,6 +15,19 @@
 #else
     #define ON_DEBUG(...)
 #endif // DEBUG
+
+/**
+ * @brief smooth abort, calls dump inside and destroys list
+ *
+ * @param list    list
+ * @param err_vec vector of list errors code (if == -1 - aborted without collecting info about errors)
+*/
+#define ABORT_LIST(list, err_vec)                                \
+{                                                                \
+    ListDump(DOT_DUMP_FILENAME, (list), (err_vec));              \
+    ListDtor(list);                                              \
+    abort();                                                     \
+}
 
 /**
  * @brief abort program and calls dump if list is corrupted, else do nothing
@@ -27,6 +42,8 @@
     if (err_vec != 0)                                                \
     {                                                                \
         fprintf(stderr, "ERROR List corrupted (%lu)\n", err_vec);    \
+        ListDump(DOT_DUMP_FILENAME, list, err_vec);                  \
+        ListDtor(list);                                              \
         abort();                                                     \
     }                                                                \
 }
@@ -82,7 +99,7 @@ List ListCtor (int size);
  *
  * @return 0
 */
-int ListDtor (List * list);
+int ListDtor (const List * list);
 
 /**
  * @brief copy everything from list_src to list_dst
