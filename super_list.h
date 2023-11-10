@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include "microhashlib/my_hash.h"
 
+// #define LINEARIZATION
+
 #define DEBUG
 
 #ifdef DEBUG
@@ -14,9 +16,9 @@
 
 #define ASSERT_LIST(list) {                                          \
     size_t err_vec = 0;                                              \
-    if (ListVerifier((const List *) list, &err_vec) != CORRECT)      \
+    if (err_vec = ListVerifier((const List *) list) != 0)            \
     {                                                                \
-        fprintf(stderr, "List corrupted\n");                         \
+        fprintf(stderr, "List corrupted (%lu)\n", err_vec);          \
         abort();                                                     \
     }                                                                \
 }
@@ -24,11 +26,6 @@
 const int POISON = 0xD00D1E;
 
 typedef int elem_t;
-
-typedef enum {
-    CORRECT   = 0,
-    INCORRECT = 1,
-} ListVerifierRes;
 
 typedef enum {
     CPY_NO_ERR     = 0,
@@ -61,9 +58,28 @@ struct List {
     int size;
 };
 
-ListVerifierRes ListVerifier (const List * list, size_t * err_vec);
-List            ListCtor     (int size);
-int             ListDtor     (List * list);
+size_t ListVerifier (const List * list);
+
+/**
+ * @brief create new list of size "size"
+ *
+ * @param size desired size of list
+ *
+ * @return new list
+ *
+ * @note after construction every element stores "POISON" and marked as free.
+ * fre points to the first element, prev of each element is -1, next points to next free element
+*/
+List ListCtor (int size);
+
+/**
+ * @brief destroy list (free all the allocated memory)
+ *
+ * @param list list
+ *
+ * @return 0
+*/
+int ListDtor (List * list);
 
 /**
  * @brief copy everything from list_src to list_dst
@@ -77,12 +93,22 @@ int             ListDtor     (List * list);
 */
 ListCopyRes     ListCopy     (List * list_dst, const List * list_src);
 
+/**
+ * @brief reallocate list (can only increase its size)
+ *
+ * @param list     list
+ * @param new_size desired size of list
+ *
+ * @return 0 if ok, err code if error
+ *
+ * @note if "LINEARIZATION" is turned on, it would be called inside this func every time before reallocation
+*/
 ListReallocRes  ListRealloc   (List * list, int new_size);
 
 /**
- * @note NOT OPTIMAL, SLOW ONE
+ *! @note NOT FINISHED, NOT OPTIMAL, SLOW, DONT USE, CREATES NEW LIST INSIDE!!!
 */
-int             ListMakeLinear   (List * list); // if user needs to store both linear and non linear list, they should make copy by themselves
+int ListMakeLinear (List * list); // if user needs to store both linear and non linear list, they should make copy by themselves
 
 /**
  * @brief get value stored in list->data[id]
@@ -96,8 +122,6 @@ int             ListMakeLinear   (List * list); // if user needs to store both l
 elem_t ListIdFind (List * list, int id);
 
 /**
- * @brief !!! function name is to make user hate this function and to teach them to store indexes
- * @brief it is not how i name functions, it is a joke !!!
  *
  * @brief iterate through the list and find "val". If found return id of "val", else return -1;
  *
@@ -106,6 +130,11 @@ elem_t ListIdFind (List * list, int id);
  *
  * @return id of "val" in the list if found
  * @return -1 if "val" not found in the list
+ *
+ * @note !!! such function name is to make user hate this function and to teach them to store indexes
+ * it is not how i name functions, it is a joke in education purposes !!!
+ *
+ * @warning traverses through the list. Much slower than access by id
 */
 int    MegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToListValFind     (List * list, elem_t val);
 

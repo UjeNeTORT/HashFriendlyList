@@ -10,21 +10,19 @@
 #define PREV(index) list->prev[(index)]
 #define DATA(index) list->data[(index)]
 
-
 typedef enum {
     SWP_NO_ERR = 0,
     SWP_ERR    = 1,
 } ListSwapRes;
 
-static elem_t*         ListDataCopy  (List * list);
 static ListSwapRes     ListElemSwap  (List * list, int id_1, int id_2);
 static ListReallocRes  ListReallocUp (List * list, int new_size);
 
 List ListCtor (int size)
 {
-    elem_t * data = (elem_t *) calloc(size, sizeof(elem_t));
-    int * next = (int *) calloc(size, sizeof(int));
-    int * prev = (int *) calloc(size, sizeof(int));
+    elem_t* data = (elem_t *) calloc(size, sizeof(elem_t));
+    int*    next = (int *)    calloc(size, sizeof(int));
+    int*    prev = (int *)    calloc(size, sizeof(int));
 
     List list = {
         data,
@@ -46,6 +44,8 @@ List ListCtor (int size)
         next[i] = i + 1;
         prev[i] = -1;
     }
+
+    next[size - 1] = -1; // no next node after the last one
 
     return list;
 }
@@ -89,29 +89,26 @@ ListCopyRes ListCopy (List * list_dst, const List * list_src)
     return CPY_NO_ERR;
 }
 
-//! not finished
-// user should understand that realloc calls ListMakeLinear inside
 ListReallocRes ListRealloc  (List * list, int new_size)
 {
     ASSERT_LIST(list);
 
     ListReallocRes ret_val = REALLC_NO_ERR;
 
+    #ifdef LINEARIZATION
+        ListMakeLinear(list);
+    #endif // LINEARIZATION
+
     if (new_size > list->size)
     {
-        ListMakeLinear(list);
-        ListReallocRes ret_val = ListReallocUp(list, new_size);
+        ret_val = ListReallocUp(list, new_size);
     }
     else if (new_size < list->size)
     {
-        ListMakeLinear(list); // * reallocation down is not yet implemented so it just makes list linear and returns "forbidden"
-
         ret_val = REALLC_FORBIDDEN;
     }
     else if (new_size == list->size)
     {
-        ListMakeLinear(list);
-
         ret_val = REALLC_FORBIDDEN;
     }
 
@@ -120,7 +117,6 @@ ListReallocRes ListRealloc  (List * list, int new_size)
     return ret_val;
 }
 
-//! not finished
 static ListReallocRes
 ListReallocUp (List * list, int new_size)
 {
@@ -149,10 +145,21 @@ ListReallocUp (List * list, int new_size)
         return REALLC_ERR;
     }
 
-    for (int i = 0; i < new_size; i++)
+    int id_free = list->fre;
+
+    while (NEXT(id_free) != -1)
     {
-        ;
+        id_free = NEXT(id_free);
     }
+
+    for (int i = id_free; i < new_size; i++)
+    {
+        NEXT(i) = i + 1;
+        DATA(i) = POISON;
+        PREV(i) = -1;
+    }
+
+    NEXT(new_size - 1) = -1; // last element has no next
 
     list->size = new_size;
 
@@ -172,9 +179,9 @@ int ListMakeLinear (List * list)
 
     while (next_id != list->prev[0])
     {
-        next_id = list->next[next_id];
+        next_id = NEXT(next_id);
 
-        ListInsertAfter(&linear_list, logic_id, list->data[next_id]);
+        ListInsertAfter(&linear_list, logic_id, DATA(next_id));
 
         logic_id++;
     }
@@ -195,7 +202,7 @@ elem_t ListIdFind (List * list, int id)
     elem_t val = POISON;
 
     if (0 < id && id < list->size)
-        val = list->data[id];
+        val = DATA(id);
     else
         fprintf(stderr, "ListIdFind: invalid id %d\n", id);
 
@@ -210,9 +217,9 @@ int MegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToListValFind (List * list,
 
     int id = -1; // not found
 
-    for (int i = list->next[0]; i != 0; i = list->next[i])
+    for (int i = NEXT(0); i != 0; i = NEXT(i))
     {
-        if (list->data[i] == val)
+        if (DATA(i) == val)
         {
             id = i;
             break;
@@ -239,34 +246,29 @@ int ListInsertEnd (List * list, elem_t val)
 {
     ASSERT_LIST(list);
 
-    int new_id = ListInsertAfter(list, list->prev[0], val);
+    int new_id = ListInsertAfter(list, PREV(0), val);
 
     ON_DEBUG(ASSERT_LIST(list));
 
     return new_id;  // where inserted value is
 }
 
-
-#define NEXT(indx) list->next[indx]
-
-// phys_indx
 int ListInsertAfter (List * list, int id, elem_t val)
 {
     ASSERT_LIST(list);
 
     int new_id = list->fre;
-    list->fre = list->next[new_id];
+    list->fre = NEXT(new_id);
 
-    list->data[new_id] = val;
+    DATA(new_id) = val;
 
-    // old_next
-    int old_nxt = list->next[id];
+    int old_nxt = NEXT(id);
 
-    list->next[id] = new_id;
-    list->next[new_id] = old_nxt;
+    NEXT(id) = new_id;
+    NEXT(new_id) = old_nxt;
 
-    list->prev[new_id] = list->prev[old_nxt];
-    list->prev[old_nxt] = new_id;
+    PREV(new_id) = PREV(old_nxt);
+    PREV(old_nxt) = new_id;
 
     ON_DEBUG(ASSERT_LIST(list));
 
@@ -277,7 +279,7 @@ int ListInsertBefore (List * list, int id, elem_t val)
 {
     ASSERT_LIST(list);
 
-    int new_id = ListInsertAfter(list, list->prev[id], val);
+    int new_id = ListInsertAfter(list, PREV(id), val);
 
     ON_DEBUG(ASSERT_LIST(list));
 
@@ -288,17 +290,17 @@ elem_t ListIdDelete (List * list, int id)
 {
     ASSERT_LIST(list);
 
-    int prev = list->prev[id];
-    int next = list->next[id];
+    int prev = PREV(id);
+    int next = NEXT(id);
 
-    list->next[prev] = next;
-    list->prev[next] = prev;
+    NEXT(prev) = next;
+    PREV(next) = prev;
 
-    elem_t deleted_el = list->data[id];
-    list->data[id] = POISON;
+    elem_t deleted_el = DATA(id);
+    DATA(id) = POISON;
 
-    list->prev[id] = -1;
-    list->next[id] = list->fre;
+    PREV(id) = -1;
+    NEXT(id) = list->fre;
     list->fre = id;
 
     ON_DEBUG(ASSERT_LIST(list));
@@ -323,40 +325,21 @@ int ListValDelete (List * list, elem_t val)
 }
 
 //! not finished
-ListVerifierRes ListVerifier (const List * list, size_t * err_vec)
+size_t ListVerifier (const List * list)
 {
-    assert(err_vec);
+    size_t err_vec = 0;
 
     if (!list)
     {
-        *err_vec |= 1;
+        err_vec |= 1;
 
-        return INCORRECT;
+        return err_vec;
     }
 
-    if (list->next[0] < 0 || list->prev[0] > list->size)
+    if (NEXT(0) < 0 || PREV(0) > list->size)
     {
-        *err_vec |= 2;
+        err_vec |= 2;
     }
 
-    // return !!err_vec;
-    if (!err_vec)   return INCORRECT;
-
-    return CORRECT;
+    return err_vec;
 }
-
-// ! not finished
-static elem_t* ListDataCopy (List * list)
-{
-    ASSERT_LIST(list);
-
-    elem_t * data_copy = (elem_t *) calloc(list->size, sizeof(elem_t));
-
-    for (int i = 0; i < list->size; i++)
-    {
-        data_copy[i] = list->data[i];
-    }
-
-    return data_copy;
-}
-
