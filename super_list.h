@@ -14,7 +14,7 @@
     #define ON_DEBUG(...)
 #endif // DEBUG
 
-#define ASSERT_LIST(list) {                                          \
+#define VERIFY_LIST(list) {                                          \
     size_t err_vec = 0;                                              \
     if (err_vec = ListVerifier((const List *) list) != 0)            \
     {                                                                \

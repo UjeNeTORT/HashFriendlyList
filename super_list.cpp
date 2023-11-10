@@ -65,7 +65,7 @@ int ListDtor (List * list)
 
 ListCopyRes ListCopy (List * list_dst, const List * list_src)
 {
-    ASSERT_LIST(list_src);
+    VERIFY_LIST(list_src);
 
     if (!memcpy(list_dst->data, list_src->data, list_src->size * sizeof(elem_t)))
     {
@@ -84,14 +84,14 @@ ListCopyRes ListCopy (List * list_dst, const List * list_src)
 
     list_dst->fre = list_src->fre;
 
-    ON_DEBUG(ASSERT_LIST(list_dst));
+    ON_DEBUG(VERIFY_LIST(list_dst));
 
     return CPY_NO_ERR;
 }
 
 ListReallocRes ListRealloc  (List * list, int new_size)
 {
-    ASSERT_LIST(list);
+    VERIFY_LIST(list);
 
     ListReallocRes ret_val = REALLC_NO_ERR;
 
@@ -112,7 +112,7 @@ ListReallocRes ListRealloc  (List * list, int new_size)
         ret_val = REALLC_FORBIDDEN;
     }
 
-    ON_DEBUG(ASSERT_LIST(list));
+    ON_DEBUG(VERIFY_LIST(list));
 
     return ret_val;
 }
@@ -120,7 +120,7 @@ ListReallocRes ListRealloc  (List * list, int new_size)
 static ListReallocRes
 ListReallocUp (List * list, int new_size)
 {
-    ASSERT_LIST(list);
+    VERIFY_LIST(list);
 
     if (new_size <= list->size)
     {
@@ -163,14 +163,14 @@ ListReallocUp (List * list, int new_size)
 
     list->size = new_size;
 
-    ON_DEBUG(ASSERT_LIST(list));
+    ON_DEBUG(VERIFY_LIST(list));
 
     return REALLC_NO_ERR;
 }
 
 int ListMakeLinear (List * list)
 {
-    ASSERT_LIST(list);
+    VERIFY_LIST(list);
 
     List linear_list = ListCtor(list->size); //? create fresh list of the same size
 
@@ -190,14 +190,14 @@ int ListMakeLinear (List * list)
 
     list = &linear_list;
 
-    ON_DEBUG(ASSERT_LIST(list));
+    ON_DEBUG(VERIFY_LIST(list));
 
     return 0;
 }
 
 elem_t ListIdFind (List * list, int id)
 {
-    ASSERT_LIST(list);
+    VERIFY_LIST(list);
 
     elem_t val = POISON;
 
@@ -206,14 +206,14 @@ elem_t ListIdFind (List * list, int id)
     else
         fprintf(stderr, "ListIdFind: invalid id %d\n", id);
 
-    ON_DEBUG(ASSERT_LIST(list));
+    ON_DEBUG(VERIFY_LIST(list));
 
     return val;
 }
 
 int MegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToListValFind (List * list, elem_t val)
 {
-    ASSERT_LIST(list);
+    VERIFY_LIST(list);
 
     int id = -1; // not found
 
@@ -226,36 +226,36 @@ int MegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToListValFind (List * list,
         }
     }
 
-    ON_DEBUG(ASSERT_LIST(list));
+    ON_DEBUG(VERIFY_LIST(list));
 
     return id;
 }
 
 int ListInsertStart (List * list, elem_t val)
 {
-    ASSERT_LIST(list);
+    VERIFY_LIST(list);
 
     int new_id = ListInsertAfter(list, 0, val);
 
-    ON_DEBUG(ASSERT_LIST(list));
+    ON_DEBUG(VERIFY_LIST(list));
 
     return new_id;  // where inserted value is
 }
 
 int ListInsertEnd (List * list, elem_t val)
 {
-    ASSERT_LIST(list);
+    VERIFY_LIST(list);
 
     int new_id = ListInsertAfter(list, PREV(0), val);
 
-    ON_DEBUG(ASSERT_LIST(list));
+    ON_DEBUG(VERIFY_LIST(list));
 
     return new_id;  // where inserted value is
 }
 
 int ListInsertAfter (List * list, int id, elem_t val)
 {
-    ASSERT_LIST(list);
+    VERIFY_LIST(list);
 
     int new_id = list->fre;
     list->fre = NEXT(new_id);
@@ -270,25 +270,25 @@ int ListInsertAfter (List * list, int id, elem_t val)
     PREV(new_id) = PREV(old_nxt);
     PREV(old_nxt) = new_id;
 
-    ON_DEBUG(ASSERT_LIST(list));
+    ON_DEBUG(VERIFY_LIST(list));
 
     return new_id; // where inserted value is
 }
 
 int ListInsertBefore (List * list, int id, elem_t val)
 {
-    ASSERT_LIST(list);
+    VERIFY_LIST(list);
 
     int new_id = ListInsertAfter(list, PREV(id), val);
 
-    ON_DEBUG(ASSERT_LIST(list));
+    ON_DEBUG(VERIFY_LIST(list));
 
     return new_id;
 }
 
 elem_t ListIdDelete (List * list, int id)
 {
-    ASSERT_LIST(list);
+    VERIFY_LIST(list);
 
     int prev = PREV(id);
     int next = NEXT(id);
@@ -303,14 +303,14 @@ elem_t ListIdDelete (List * list, int id)
     NEXT(id) = list->fre;
     list->fre = id;
 
-    ON_DEBUG(ASSERT_LIST(list));
+    ON_DEBUG(VERIFY_LIST(list));
 
     return deleted_el;
 }
 
 int ListValDelete (List * list, elem_t val)
 {
-    ASSERT_LIST(list);
+    VERIFY_LIST(list);
 
     int id = MegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToListValFind(list, val);
 
@@ -319,7 +319,7 @@ int ListValDelete (List * list, elem_t val)
         elem_t del_val = ListIdDelete(list, id);
     }
 
-    ON_DEBUG(ASSERT_LIST(list));
+    ON_DEBUG(VERIFY_LIST(list));
 
     return id;
 }
@@ -340,6 +340,8 @@ size_t ListVerifier (const List * list)
     {
         err_vec |= 2;
     }
+
+
 
     return err_vec;
 }
