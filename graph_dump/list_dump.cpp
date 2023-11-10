@@ -31,31 +31,24 @@ char * FormDotCode (const List * list, size_t err_vec, const char * add_info)
 
     char * dot_code = (char *) calloc(size, sizeof(char));
 
-    char * style = (char *) calloc(STYLE_TAG_SIZE, sizeof(char));
-
-    sprintf(style, "bgcolor=\"lightblue\"\n"
-                   "");
-
     char * vals  = FormVals     (list, size);
     char * nodes = FormNodes    (list, size);
     char * edges = FormEdges    (list, size);
-    char * rank  = FormSameRank (list, size);
 
     sprintf(dot_code, "digraph list_%d {\n"
                       "rankdir = LR\n"
-                      "\tedge[minlen = 1.5, penwidth = 1.5];\n"
+                      "splines = ortho\n"
+                      "nodesep = 0.8\n"
+                      "\tedge[minlen = 1, penwidth = 1.5];\n"
                       "%s"
                       "%s"
                       "%s"
                       "%s"
-                      "%s"
-                      "}\n", rand(), nodes, edges, vals, style, add_info);
+                      "}\n", rand(), nodes, edges, vals, add_info);
 
     free(vals);
     free(nodes);
     free(edges);
-    free(style);
-    free(rank);
 
     return dot_code;
 }
@@ -76,7 +69,7 @@ char * FormVals (const List * list, size_t size)
     sprintf(vals, "subgraph cluster_val {\n%n", &symbs);
     vals += symbs;
 
-    sprintf(vals, "     val_fre  [ shape = box3d, %s, label = \" fre\n%d \"];\n%n", style, list->fre, &symbs);
+    sprintf(vals, "     val_fre  [ shape = none, %s, fontcolor = white, label = \" fre\n%d \", image = \"cat.jpg\"];\n%n", style, list->fre, &symbs);
     vals += symbs;
 
     sprintf(vals, "}\n%n", &symbs);
@@ -102,13 +95,22 @@ char * FormNodes (const List * list, size_t size)
                    "style=rounded\n"
                    "color = green\n");
 
-    sprintf(nodes, "subgraph cluster_nodes_%d {\n%n", rand(), &symbs);
+    sprintf(nodes, "subgraph cluster_nodes_%d {\n"
+                   "bgcolor=\"#B5E2FA\" \n%n", rand(), &symbs);
     nodes += symbs;
 
     for (int i = 0; i < list->size; i++, symbs = 0)
     {
-        sprintf(nodes, "    node_%d [%s shape = record, label = \" %d | data = %d | <fnext> next = %d | <fprev> prev = %d \"];\n%n", i, style, i, list->data[i], list->next[i], list->prev[i], &symbs);
-        nodes += symbs;
+        if (list->prev[i] != -1)
+        {
+            sprintf(nodes, "\tnode_%d [%s shape = record, style = filled, fillcolor = \"#4CB944\", label = \" %d | data = %d | <fnext> next = %d | <fprev> prev = %d \"];\n%n", i, style, i, list->data[i], list->next[i], list->prev[i], &symbs);
+            nodes += symbs;
+        }
+        else
+        {
+            sprintf(nodes, "\tnode_%d [%s shape = record, style = filled, fillcolor = \"#F5EE9E\", label = \" %d | data = %d | <fnext> next = %d | <fprev> prev = %d \"];\n%n", i, style, i, list->data[i], list->next[i], list->prev[i], &symbs);
+            nodes += symbs;
+        }
     }
 
     sprintf(nodes, "}\n%n", &symbs);
@@ -130,12 +132,15 @@ char * FormEdges (const List * list, size_t size)
 
     char * style = (char *) calloc(STYLE_TAG_SIZE, sizeof(char));
 
-    sprintf(edges, "val_fre -> node_%d;\n%n", list->fre, &symbs);
-    edges += symbs;
+    if (list->fre != -1)
+    {
+        sprintf(edges, "val_fre -> node_%d;\n%n", list->fre, &symbs);
+        edges += symbs;
+    }
 
     // invisible arrows to align graph elems
     for (int i = 0; i < list->size - 1; i++) {
-        sprintf(edges, "\tnode_%d -> node_%d[weight = 100, style = invis];\n %n", i, i + 1, &symbs);
+        sprintf(edges, "\tnode_%d -> node_%d[weight = 1000, style = invis];\n %n", i, i + 1, &symbs);
         edges += symbs;
     }
 
@@ -144,8 +149,17 @@ char * FormEdges (const List * list, size_t size)
     {
         if (list->next[i] != -1)
         {
-            sprintf(edges, "node_%d -> node_%d  [color = blue];\n%n", i, list->next[i], &symbs);
-            edges += symbs;
+            if (list->prev[i] != -1)
+            {
+                sprintf(edges, "node_%d -> node_%d  [color = blue];\n%n", i, list->next[i], &symbs);
+                edges += symbs;
+            }
+            else
+            {
+                sprintf(edges, "node_%d -> node_%d  [color = grey];\n%n", i, list->next[i], &symbs);
+                edges += symbs;
+            }
+
         }
     }
 
@@ -161,33 +175,6 @@ char * FormEdges (const List * list, size_t size)
     free(style);
 
     return edges_init;
-}
-
-char * FormSameRank (const List * list, size_t size)
-{
-    assert(list);
-
-    char * same_rank = (char *) calloc(size, sizeof(char));
-    char * same_rank_init = same_rank;
-
-    int symbs = 0;
-
-    sprintf(same_rank, "{rank = same; %n", &symbs);
-    same_rank += symbs;
-
-    for (int i = 1; i < list->size; i++, symbs = 0)
-    {
-        sprintf(same_rank, "node_%d; %n", i,&symbs);
-        same_rank += symbs;
-    }
-
-    sprintf(same_rank, "}\n%n", &symbs);
-    same_rank += symbs;
-
-    sprintf(same_rank, "{rank = same; node_0; node_add_info; val_head; val_tail; val_fre; }\n%n", &symbs);
-    same_rank += symbs;
-
-    return same_rank_init;
 }
 
 int WriteDotCode (const char * fname, const char * dot_code)
