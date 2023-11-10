@@ -4,6 +4,8 @@
 #include <string.h>
 #include <time.h>
 
+const int DEFAULT_BUF_SIZE = 1000;
+
 #include "../super_list.h"
 #include "list_dump.h"
 
@@ -12,7 +14,7 @@ int ListDump (const char * fname, const List * list, size_t err_vec)
     assert(fname);
     assert(list);
 
-    char * add_info = FormAddInfo();
+    char * add_info = FormAddInfo(err_vec);
     char * dot_code = FormDotCode(list, err_vec, (const char *) add_info);
 
     WriteDotCode(fname, (const char *) dot_code);
@@ -27,7 +29,7 @@ char * FormDotCode (const List * list, size_t err_vec, const char * add_info)
 {
     assert(list);
 
-    size_t size = list->size * 1000;
+    size_t size = DEFAULT_BUF_SIZE * 1000;
 
     char * dot_code = (char *) calloc(size, sizeof(char));
 
@@ -140,7 +142,7 @@ char * FormEdges (const List * list, size_t size)
 
     // invisible arrows to align graph elems
     for (int i = 0; i < list->size - 1; i++) {
-        sprintf(edges, "\tnode_%d -> node_%d[weight = 1000, style = invis];\n %n", i, i + 1, &symbs);
+        sprintf(edges, "\tnode_%d -> node_%d[weight = 10, style = invis];\n %n", i, i + 1, &symbs);
         edges += symbs;
     }
 
@@ -191,17 +193,79 @@ int WriteDotCode (const char * fname, const char * dot_code)
     return ret_code;
 }
 
-char * FormAddInfo()
+char * FormAddInfo(size_t err_vec)
 {
     char * add_info = (char *) calloc(1000, sizeof(char));
+    char * add_info_init = add_info;
 
     time_t t = time(NULL);
 
     tm * loc_time = localtime(&t);
 
+    int symbs = 0;
+
     sprintf(add_info, "subgraph cluster_add_info_%d{\n"
                       "node_add_info [shape = plaintext, label = \" %s \"];\n"
-                      "}\n", rand(), asctime(loc_time));
+                      "}\n%n", rand(), asctime(loc_time), &symbs);
 
-    return add_info;
+    add_info += symbs;
+
+    char * err_info = (char *) calloc(STYLE_TAG_SIZE, sizeof(char));
+    char * err_info_init = err_info;
+
+    if (err_vec & LST_ERR_NO_LIST_PTR)
+    {
+        sprintf(err_info, "List nullptr\n%n", &symbs);
+        err_info += symbs;
+    }
+    if (err_vec & LST_ERR_NO_DATA_PTR)
+    {
+        sprintf(err_info, "List data nullptr\n%n", &symbs);
+        err_info += symbs;
+    }
+    if (err_vec & LST_ERR_NO_NEXT_PTR)
+    {
+        sprintf(err_info, "List next nullptr\n%n", &symbs);
+        err_info += symbs;
+    }
+    if (err_vec & LST_ERR_NO_PREV_PTR)
+    {
+        sprintf(err_info, "List prev nullptr\n%n", &symbs);
+        err_info += symbs;
+    }
+    if (err_vec & LST_ERR_HEAD_TAIL)
+    {
+        sprintf(err_info, "List head or tail incorrect\n%n", &symbs);
+        err_info += symbs;
+    }
+    if (err_vec & LST_ERR_CHAIN)
+    {
+        sprintf(err_info, "List chain in next or prev has loops\n%n", &symbs);
+        err_info += symbs;
+    }
+    if (err_vec & LST_ERR_FRE_PREV)
+    {
+        sprintf(err_info, "Free list node has prev != -1\n%n", &symbs);
+        err_info += symbs;
+    }
+    if (err_vec & LST_ERR_FRE)
+    {
+        sprintf(err_info, "List fre incorrect\n%n", &symbs);
+        err_info += symbs;
+    }
+    if (err_vec & LST_ERR_SIZE)
+    {
+        sprintf(err_info, "List size incorrect\n%n", &symbs);
+        err_info += symbs;
+    }
+
+    if (err_info != err_info_init)
+    {
+        sprintf(add_info, "subgraph cluster_err_info{\n"
+                      "node_err_info [shape = plaintext, label = \" %s \"];\n}\n", err_info_init);
+    }
+
+    free(err_info_init);
+
+    return add_info_init;
 }

@@ -13,6 +13,7 @@ typedef enum {
     LST_ERR_CHAIN          = 32,
     LST_ERR_FRE_PREV       = 64,
     LST_ERR_FRE            = 128,
+    LST_ERR_SIZE           = 256,
 } ERRORS_LIST;
 
 const char * const DUMP_FNAME = "list_dump.svg";
@@ -25,6 +26,6 @@ char * FormEdges    (const List * list, size_t size);
 char * FormDotCode  (const List * list, size_t err_vec, const char * add_info);
 int    WriteDotCode (const char * fname, const char * dot_code);
 
-char * FormAddInfo();
+char * FormAddInfo(size_t err_vec);
 
 #endif // LIST_DUMP_H

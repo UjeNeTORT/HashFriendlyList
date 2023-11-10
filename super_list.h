@@ -43,6 +43,7 @@ const char * const DOT_DUMP_FILENAME = "graph.dot";
     {                                                                \
         fprintf(stderr, "ERROR List corrupted (%lu)\n", err_vec);    \
         ListDump(DOT_DUMP_FILENAME, list, err_vec);                  \
+        printf("aldsfdsafadsf\n"); \
         ListDtor(list);                                              \
         abort();                                                     \
     }                                                                \

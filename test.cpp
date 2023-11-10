@@ -20,6 +20,7 @@ int main()
     ListInsertEnd(&lst_1, 666);
     ListInsertEnd(&lst_1, 1000);
     ListInsertEnd(&lst_1, 777);
+
     ListIdDelete(&lst_1, 3);
 
     ListDump("graph.dot", &lst_1, 0);

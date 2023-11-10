@@ -414,6 +414,11 @@ size_t ListVerifier (const List * list)
         return err_vec;
     }
 
+    if (list->size <= 0)
+    {
+        err_vec |= LST_ERR_SIZE;
+    }
+
     if (NEXT(0) < 0 || PREV(0) > list->size)
     {
         err_vec |= LST_ERR_HEAD_TAIL;
