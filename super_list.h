@@ -14,11 +14,19 @@
     #define ON_DEBUG(...)
 #endif // DEBUG
 
-#define VERIFY_LIST(list) {                                          \
-    size_t err_vec = 0;                                              \
-    if (err_vec = ListVerifier((const List *) list) != 0)            \
+/**
+ * @brief abort program and calls dump if list is corrupted, else do nothing
+ *
+ * @param list list to get checked
+ *
+ * @warning abort inside
+*/
+#define VERIFY_LIST(list)                                            \
+{                                                                    \
+    size_t err_vec = ListVerifier((const List *) list);              \
+    if (err_vec != 0)                                                \
     {                                                                \
-        fprintf(stderr, "List corrupted (%lu)\n", err_vec);          \
+        fprintf(stderr, "ERROR List corrupted (%lu)\n", err_vec);    \
         abort();                                                     \
     }                                                                \
 }
@@ -28,34 +36,29 @@ const int POISON = 0xD00D1E;
 typedef int elem_t;
 
 typedef enum {
-    CPY_NO_ERR     = 0,
-    CPY_ERR_MEMCPY = 1,
+    CPY_NO_ERR     = 0, //< successfully copied
+    CPY_ERR_MEMCPY = 1, //< memcpy returned nullptr
 } ListCopyRes;
 
 typedef enum {
-    REALLC_NO_ERR    = 0,
-    REALLC_FORBIDDEN = 1,
-    REALLC_ERR       = 2,
+    REALLC_NO_ERR    = 0, // successfully realloced
+    REALLC_FORBIDDEN = 1, // reallocation didnt happen (in case new_size <= size - such functionality is not provided)
+    REALLC_ERR       = 2, // reallocation started but finished with error (realloc returned nullptr or func designed to treat such new_size as an error)
 } ListReallocRes;
 
-struct ListNode
-{
-    elem_t data;
-    int next;
-    int prev;
-};
-
+/**
+ * @warning access allowed only by functions ListDoSmth
+ *
+ * @note list node and element are synonyms. Element can be free or it can store some value of type elem_t
+*/
 struct List {
+    elem_t * data;  // by default stores POISON
+    int * next;     // contains ids of next elements for each elem. There are two separate singly-linked lists in "next" (one of them is for free nodes - it statrs at id "fre").
+    int * prev;     // contains ids of prev elements for each non-free elem. If node is free, contains -1;
 
-    // ListNode[]
+    int fre;        // id of first free node in "next" array
 
-    elem_t * data;
-    int * next;
-    int * prev;
-
-    int fre;
-
-    int size;
+    int size;       // list size, can be changed via ListRealloc
 };
 
 size_t ListVerifier (const List * list);
@@ -91,7 +94,7 @@ int ListDtor (List * list);
  *
  * @return ListCopyRes (0 - if ok, not 0 - if there were errors inside)
 */
-ListCopyRes     ListCopy     (List * list_dst, const List * list_src);
+ListCopyRes ListCopy (List * list_dst, const List * list_src);
 
 /**
  * @brief reallocate list (can only increase its size)
@@ -99,16 +102,18 @@ ListCopyRes     ListCopy     (List * list_dst, const List * list_src);
  * @param list     list
  * @param new_size desired size of list
  *
- * @return 0 if ok, err code if error
+ * @return REALLC_NO_ERR    = 0 if reallocation have happened
+ * @return REALLC_FORBIDDEN = 1 if reallocation didnt happen (highly likely due to passing new_size <= size to function - such functionality is not provided)
+ * @return REALLC_ERR       = 2 if reallocation started but couldnt finish due to an error
  *
- * @note if "LINEARIZATION" is turned on, it would be called inside this func every time before reallocation
+ * @note if "LINEARIZATION" is on, it will be called inside this func every time before reallocation
 */
-ListReallocRes  ListRealloc   (List * list, int new_size);
+ListReallocRes ListRealloc (List * list, int new_size);
 
 /**
- *! @note NOT FINISHED, NOT OPTIMAL, SLOW, DONT USE, CREATES NEW LIST INSIDE!!!
+ *! @warning NOT FINISHED, NOT OPTIMAL, SLOW, DONT USE, CREATES NEW LIST INSIDE!!!
 */
-int ListMakeLinear (List * list); // if user needs to store both linear and non linear list, they should make copy by themselves
+int ListMakeLinear (List * list); //! not finished
 
 /**
  * @brief get value stored in list->data[id]
@@ -123,7 +128,7 @@ elem_t ListIdFind (List * list, int id);
 
 /**
  *
- * @brief iterate through the list and find "val". If found return id of "val", else return -1;
+ * @brief traverse through the list and find "val". If found return id of "val", else return -1;
  *
  * @param list list
  * @param val  value, id of which is to be returned
@@ -131,12 +136,12 @@ elem_t ListIdFind (List * list, int id);
  * @return id of "val" in the list if found
  * @return -1 if "val" not found in the list
  *
- * @note !!! such function name is to make user hate this function and to teach them to store indexes
- * it is not how i name functions, it is a joke in education purposes !!!
+ * @note !!! Such function name is to make user hate this function and to teach them to store indexes by themselves.
+ * It is not how i name functions, it is a joke in education purposes !!!
  *
  * @warning traverses through the list. Much slower than access by id
 */
-int    MegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToListValFind     (List * list, elem_t val);
+int MegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToListValFind (List * list, elem_t val);
 
 /**
  * @brief insert "val" in the beginning of the list
@@ -147,7 +152,7 @@ int    MegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToListValFind     (List 
  * @return id of "val" in the list
  * @return -1 if no free place in the list (no more reallocs we can do)
 */
-int    ListInsertStart (List * list, elem_t val);
+int    ListInsertBegin (List * list, elem_t val);
 
 /**
  * @brief insert "val" in the end of the list

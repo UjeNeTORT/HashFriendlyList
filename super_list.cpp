@@ -6,6 +6,21 @@
 #include "super_list.h"
 #include "graph_dump/list_dump.h"
 
+/**
+ * @brief abort if id not allowed for list, otherwise do nothing
+ *
+ * @param list list
+ * @param id   id to get checked
+ *
+ * @warning abort inside
+*/
+#define VERIFY_ID(list, id)      \
+{                                \
+    if (ListVerifyId(list, id))  \
+        abort();                 \
+}
+
+// DSL
 #define NEXT(index) list->next[(index)]
 #define PREV(index) list->prev[(index)]
 #define DATA(index) list->data[(index)]
@@ -15,19 +30,47 @@ typedef enum {
     SWP_ERR    = 1,
 } ListSwapRes;
 
-static ListSwapRes     ListElemSwap  (List * list, int id_1, int id_2);
+/**
+ * @warning not finished dont use
+*/
+static ListSwapRes ListElemSwap (List * list, int id_1, int id_2);
+
+/**
+ * @brief increase size of list from size to new_size
+ *
+ * @param list     list
+ * @param new_size desired new size of the list
+ *
+ * @return REALLC_NO_ERR    = 0 if reallocation have happened
+ * @return REALLC_ERR       = 2 if reallocation started but couldnt finish due to an error
+ *
+ * @note function is designed to increase size of the list so if new_size < size it would be a mistake and fucntion
+ *       will return an error code
+*/
 static ListReallocRes  ListReallocUp (List * list, int new_size);
+
+/**
+ * todo docs
+*/
+static int ListVerifyId  (const List * list, int id);
 
 List ListCtor (int size)
 {
+    if (size <= 0)
+    {
+        fprintf(stderr, "ERROR ListCtor: size (%d) must be more than 0\n", size);
+
+        return {};
+    }
+
     elem_t* data = (elem_t *) calloc(size, sizeof(elem_t));
     int*    next = (int *)    calloc(size, sizeof(int));
     int*    prev = (int *)    calloc(size, sizeof(int));
 
     List list = {
-        data,
-        next,
-        prev,
+        .data = data,
+        .next = next,
+        .prev = prev,
 
         .fre  = 1,
 
@@ -170,6 +213,10 @@ ListReallocUp (List * list, int new_size)
 
 int ListMakeLinear (List * list)
 {
+    // ! dont use not finished
+
+    return -1;
+
     VERIFY_LIST(list);
 
     List linear_list = ListCtor(list->size); //? create fresh list of the same size
@@ -198,6 +245,7 @@ int ListMakeLinear (List * list)
 elem_t ListIdFind (List * list, int id)
 {
     VERIFY_LIST(list);
+    VERIFY_ID(list, id);
 
     elem_t val = POISON;
 
@@ -231,7 +279,7 @@ int MegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToListValFind (List * list,
     return id;
 }
 
-int ListInsertStart (List * list, elem_t val)
+int ListInsertBegin (List * list, elem_t val)
 {
     VERIFY_LIST(list);
 
@@ -256,6 +304,7 @@ int ListInsertEnd (List * list, elem_t val)
 int ListInsertAfter (List * list, int id, elem_t val)
 {
     VERIFY_LIST(list);
+    VERIFY_ID(list, id);
 
     int new_id = list->fre;
     list->fre = NEXT(new_id);
@@ -278,6 +327,7 @@ int ListInsertAfter (List * list, int id, elem_t val)
 int ListInsertBefore (List * list, int id, elem_t val)
 {
     VERIFY_LIST(list);
+    VERIFY_ID(list, id);
 
     int new_id = ListInsertAfter(list, PREV(id), val);
 
@@ -289,6 +339,7 @@ int ListInsertBefore (List * list, int id, elem_t val)
 elem_t ListIdDelete (List * list, int id)
 {
     VERIFY_LIST(list);
+    VERIFY_ID(list, id);
 
     int prev = PREV(id);
     int next = NEXT(id);
@@ -316,7 +367,7 @@ int ListValDelete (List * list, elem_t val)
 
     if (id != -1)
     {
-        elem_t del_val = ListIdDelete(list, id);
+        ListIdDelete(list, id);
     }
 
     ON_DEBUG(VERIFY_LIST(list));
@@ -331,17 +382,88 @@ size_t ListVerifier (const List * list)
 
     if (!list)
     {
-        err_vec |= 1;
+        err_vec |= LST_ERR_NO_LIST_PTR;
+
+        return err_vec;
+    }
+
+    if (!list->data)
+    {
+        err_vec |= LST_ERR_NO_DATA_PTR;
+
+        return err_vec;
+    }
+
+    if (!list->next)
+    {
+        err_vec |= LST_ERR_NO_NEXT_PTR;
+
+        return err_vec;
+    }
+
+    if (!list->prev)
+    {
+        err_vec |= LST_ERR_NO_PREV_PTR;
 
         return err_vec;
     }
 
     if (NEXT(0) < 0 || PREV(0) > list->size)
     {
-        err_vec |= 2;
+        err_vec |= LST_ERR_HEAD_TAIL;
     }
 
+    // check if nexts of used elements form chain which ends at tail
+    for (int i = NEXT(0), cnt = 0; i != PREV(0); i = NEXT(i), cnt++)
+    {
+        if (cnt > list->size)
+        {
+            err_vec |= LST_ERR_CHAIN;
+            break;
+        }
 
+        if (PREV(i) == -1)
+        {
+            err_vec |= LST_ERR_FRE_PREV;
+        }
+    }
+
+    // check if nexts of free elements form chain and that their prevs = -1
+    for (int i = NEXT(list->fre), cnt = 0; i != -1; i = NEXT(i), cnt++)
+    {
+        if (cnt > list->size || i >= list->size)
+        {
+            err_vec |= LST_ERR_CHAIN;
+
+            break;
+        }
+
+        if (PREV(i) != -1)
+        {
+            err_vec |= LST_ERR_FRE_PREV;
+        }
+    }
 
     return err_vec;
+}
+
+static int ListVerifyId (const List * list, int id)
+{
+    VERIFY_LIST(list);
+
+    if (id < 0)
+    {
+        fprintf(stderr, "List id %d < 0\n", id);
+
+        return 1;
+    }
+
+    if (id >= list->size)
+    {
+        fprintf(stderr, "List id %d > list size\n", id);
+
+        return 1;
+    }
+
+    return 0;
 }
