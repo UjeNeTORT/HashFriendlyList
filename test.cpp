@@ -1,13 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "super_list.h"
 #include "graph_dump/list_dump.h"
 
 int main()
 {
+    srand(time(NULL));
+
     List lst_1 = ListCtor(10);
+    ListDump("graph.dot", &lst_1, 0, DEBUG_INFO(&lst_1));
 
     InsertEndList(&lst_1, 111);
     InsertEndList(&lst_1, 222);

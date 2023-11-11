@@ -29,3 +29,5 @@ clean:
 	rm -f *.exe
 	rm -f *.dot
 	rm -f *.html
+	rm -f graph_dump/dumps/*.png
+	rm -f graph_dump/dumps/*.html
