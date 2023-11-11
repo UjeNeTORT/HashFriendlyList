@@ -14,8 +14,8 @@ int ListDump (const char * fname, const List * list, size_t err_vec)
     assert(fname);
     assert(list);
 
-    char * add_info = FormAddInfo(err_vec);
-    char * dot_code = FormDotCode(list, err_vec, (const char *) add_info);
+    char * add_info = CreateAddInfo(err_vec);
+    char * dot_code = CreateDotCode(list, (const char *) add_info);
 
     WriteDotCode(fname, (const char *) dot_code);
 
@@ -25,7 +25,7 @@ int ListDump (const char * fname, const List * list, size_t err_vec)
     return 0;
 }
 
-char * FormDotCode (const List * list, size_t err_vec, const char * add_info)
+char * CreateDotCode (const List * list, const char * add_info)
 {
     assert(list);
 
@@ -33,9 +33,9 @@ char * FormDotCode (const List * list, size_t err_vec, const char * add_info)
 
     char * dot_code = (char *) calloc(size, sizeof(char));
 
-    char * vals  = FormVals     (list, size);
-    char * nodes = FormNodes    (list, size);
-    char * edges = FormEdges    (list, size);
+    char * nodes = CreateNodes (list, size);
+    char * vals  = CreateVals  (list, size);
+    char * edges = CreateEdges (list, size);
 
     sprintf(dot_code, "digraph list_%d {\n"
                       "rankdir = LR\n"
@@ -55,7 +55,7 @@ char * FormDotCode (const List * list, size_t err_vec, const char * add_info)
     return dot_code;
 }
 
-char * FormVals (const List * list, size_t size)
+char * CreateVals (const List * list, size_t size)
 {
     assert(list);
 
@@ -82,7 +82,7 @@ char * FormVals (const List * list, size_t size)
     return vals_init;
 }
 
-char * FormNodes (const List * list, size_t size)
+char * CreateNodes (const List * list, size_t size)
 {
     assert(list);
 
@@ -123,7 +123,7 @@ char * FormNodes (const List * list, size_t size)
     return nodes_init;
 }
 
-char * FormEdges (const List * list, size_t size)
+char * CreateEdges (const List * list, size_t size)
 {
     assert(list);
 
@@ -193,7 +193,7 @@ int WriteDotCode (const char * fname, const char * dot_code)
     return ret_code;
 }
 
-char * FormAddInfo(size_t err_vec)
+char * CreateAddInfo(size_t err_vec)
 {
     char * add_info = (char *) calloc(1000, sizeof(char));
     char * add_info_init = add_info;
