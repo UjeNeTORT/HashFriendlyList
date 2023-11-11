@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 const int DEFAULT_BUF_SIZE = 1000;
 const char * HTML_DUMP_FNAME = "graph_dump/dumps/dump1.html";
@@ -21,10 +22,7 @@ int ListDump (const char * fname, const List * list, size_t err_vec, ListDebugIn
 
     char * command = (char *) calloc(DEFAULT_BUF_SIZE, sizeof(char));
 
-    srand(time(0));
     int dump_id = rand();
-
-    printf("dump_id = %d\n", dump_id);
 
     sprintf(command, "dot -Tpng %s -o graph_dump/dumps/graph_dump_%d.png", fname, dump_id);
     system(command);
@@ -54,7 +52,6 @@ char * CreateDotCode (const List * list)
                       "splines = ortho\n"
                       "nodesep = 0.8\n"
                       "\tedge[minlen = 1, penwidth = 1.5];\n"
-                      "%s"
                       "%s"
                       "%s"
                       "%s"
@@ -205,88 +202,22 @@ int WriteDotCode (const char * fname, const char * dot_code)
     return ret_code;
 }
 
-char * CreateAddInfo(size_t err_vec, ListDebugInfo debug_info)
+int WriteHTML (const char * HTML_fname, int dump_id, size_t err_vec, ListDebugInfo debug_info)
 {
-    char * add_info = (char *) calloc(1000, sizeof(char));
-    char * add_info_init = add_info;
+    assert(HTML_fname);
 
     time_t t = time(NULL);
 
     tm * loc_time = localtime(&t);
 
-    int symbs = 0;
-
-    char * err_info = (char *) calloc(STYLE_TAG_SIZE, sizeof(char));
-    char * err_info_init = err_info;
-
-    if (err_vec & LST_ERR_NO_LIST_PTR)
-    {
-        sprintf(err_info, "List nullptr\n%n", &symbs);
-        err_info += symbs;
-    }
-    if (err_vec & LST_ERR_NO_DATA_PTR)
-    {
-        sprintf(err_info, "List data nullptr\n%n", &symbs);
-        err_info += symbs;
-    }
-    if (err_vec & LST_ERR_NO_NEXT_PTR)
-    {
-        sprintf(err_info, "List next nullptr\n%n", &symbs);
-        err_info += symbs;
-    }
-    if (err_vec & LST_ERR_NO_PREV_PTR)
-    {
-        sprintf(err_info, "List prev nullptr\n%n", &symbs);
-        err_info += symbs;
-    }
-    if (err_vec & LST_ERR_HEAD_TAIL)
-    {
-        sprintf(err_info, "List head or tail incorrect\n%n", &symbs);
-        err_info += symbs;
-    }
-    if (err_vec & LST_ERR_CHAIN)
-    {
-        sprintf(err_info, "List chain in next or prev has loops\n%n", &symbs);
-        err_info += symbs;
-    }
-    if (err_vec & LST_ERR_FRE_PREV)
-    {
-        sprintf(err_info, "Free list node has prev != -1\n%n", &symbs);
-        err_info += symbs;
-    }
-    if (err_vec & LST_ERR_FRE)
-    {
-        sprintf(err_info, "List fre incorrect\n%n", &symbs);
-        err_info += symbs;
-    }
-    if (err_vec & LST_ERR_SIZE)
-    {
-        sprintf(err_info, "List size incorrect\n%n", &symbs);
-        err_info += symbs;
-    }
-
-    char * list_info = (char *) calloc(STYLE_TAG_SIZE, sizeof(char));
-    sprintf(list_info, "List \\\"%s\\\" called from %s %s (%d)\n", debug_info.list_name, debug_info.filename, debug_info.funcname, debug_info.line);
-
-    sprintf(add_info, "subgraph cluster_add_info {\n"
-                  "node_err_info [shape = plaintext, label = \" %s \"];\n"
-                  "node_dbg_info [shape = plaintext, label = \" %s \"];\n"
-                  "node_add_info [shape = plaintext, label = \" %s \"];\n}%n", err_info_init, list_info, asctime(loc_time), &symbs);
-    add_info += symbs;
-
-    free(err_info_init);
-    free(list_info);
-
-    return add_info_init;
-}
-
-int WriteHTML (const char * HTML_fname, int dump_id, size_t err_vec, ListDebugInfo debug_info)
-{
-    assert(HTML_fname);
-
     FILE * HTML_file = fopen(HTML_fname, "ab");
 
+    fprintf(HTML_file, "<p style=\"font-family:monospace; font-size: 20px\">[%s]\nLIST DUMP of \"%s\" called from %s (%d) from %s</p>", asctime(loc_time), debug_info.list_name, debug_info.funcname, debug_info.line, debug_info.filename);
+
     fprintf(HTML_file, "<img src=\"./graph_dump_%d.png\">\n", dump_id);
+
+    fprintf(HTML_file, "<hr>\n", dump_id);
+    fprintf(HTML_file, "<hr>\n", dump_id);
 
     fclose(HTML_file);
 
