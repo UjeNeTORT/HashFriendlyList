@@ -20,7 +20,12 @@ int ListDump (const char * fname, const List * list, size_t err_vec, ListDebugIn
     WriteDotCode(fname, (const char *) dot_code);
 
     char * command = (char *) calloc(DEFAULT_BUF_SIZE, sizeof(char));
+
+    srand(time(0));
     int dump_id = rand();
+
+    printf("dump_id = %d\n", dump_id);
+
     sprintf(command, "dot -Tpng %s -o graph_dump/dumps/graph_dump_%d.png", fname, dump_id);
     system(command);
 
@@ -281,7 +286,7 @@ int WriteHTML (const char * HTML_fname, int dump_id, size_t err_vec, ListDebugIn
 
     FILE * HTML_file = fopen(HTML_fname, "ab");
 
-    fprintf(HTML_file, "<img src=\"./graph_dump_%d.png\">", dump_id);
+    fprintf(HTML_file, "<img src=\"./graph_dump_%d.png\">\n", dump_id);
 
     fclose(HTML_file);
 
