@@ -17,11 +17,11 @@ const char * const DOT_DUMP_FILENAME = "graph.dot";
 
 #ifdef DEBUG
 
-    #define DEBUG_INFO(list) {#list, __FILE__, __LINE__}
+    #define DEBUG_INFO(list) {#list, __FILE__, __FUNCTION__, __LINE__}
 
 #else
 
-    #define DEBUG_INFO(list) {NULL, NULL, -1}
+    #define DEBUG_INFO(list) {NULL, NULL, NULL, -1}
 
 #endif
 
@@ -109,6 +109,7 @@ struct ListDebugInfo
 {
     const char * list_name;
     const char * filename;
+    const char * funcname;
     int          line;
 };
 

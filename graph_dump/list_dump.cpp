@@ -5,6 +5,7 @@
 #include <time.h>
 
 const int DEFAULT_BUF_SIZE = 1000;
+const char * HTML_DUMP_FNAME = "graph_dump/dumps/dump1.html";
 
 #include "../super_list.h"
 #include "list_dump.h"
@@ -14,18 +15,24 @@ int ListDump (const char * fname, const List * list, size_t err_vec, ListDebugIn
     assert(fname);
     assert(list);
 
-    char * add_info = CreateAddInfo(err_vec, debug_info);
-    char * dot_code = CreateDotCode(list, (const char *) add_info);
+    char * dot_code = CreateDotCode(list);
 
     WriteDotCode(fname, (const char *) dot_code);
 
+    char * command = (char *) calloc(DEFAULT_BUF_SIZE, sizeof(char));
+    int dump_id = rand();
+    sprintf(command, "dot -Tpng %s -o graph_dump/dumps/graph_dump_%d.png", fname, dump_id);
+    system(command);
+
+    WriteHTML(HTML_DUMP_FNAME, dump_id, err_vec, debug_info);
+
+    free(command);
     free(dot_code);
-    free(add_info);
 
     return 0;
 }
 
-char * CreateDotCode (const List * list, const char * add_info)
+char * CreateDotCode (const List * list)
 {
     assert(list);
 
@@ -46,7 +53,7 @@ char * CreateDotCode (const List * list, const char * add_info)
                       "%s"
                       "%s"
                       "%s"
-                      "}\n", rand(), nodes, edges, vals, add_info);
+                      "}\n", rand(), nodes, edges, vals);
 
     free(vals);
     free(nodes);
@@ -204,12 +211,6 @@ char * CreateAddInfo(size_t err_vec, ListDebugInfo debug_info)
 
     int symbs = 0;
 
-    // sprintf(add_info, "subgraph cluster_add_info_%d{\n"
-                    //   "node_add_info [shape = plaintext, label = \" %s \"];\n"
-                    //   "}\n%n", rand(), asctime(loc_time), &symbs);
-//
-    // add_info += symbs;
-
     char * err_info = (char *) calloc(STYLE_TAG_SIZE, sizeof(char));
     char * err_info_init = err_info;
 
@@ -260,7 +261,7 @@ char * CreateAddInfo(size_t err_vec, ListDebugInfo debug_info)
     }
 
     char * list_info = (char *) calloc(STYLE_TAG_SIZE, sizeof(char));
-    sprintf(list_info, "List \\\"%s\\\" called from %s (%d)\n", debug_info.list_name, debug_info.filename, debug_info.line);
+    sprintf(list_info, "List \\\"%s\\\" called from %s %s (%d)\n", debug_info.list_name, debug_info.filename, debug_info.funcname, debug_info.line);
 
     sprintf(add_info, "subgraph cluster_add_info {\n"
                   "node_err_info [shape = plaintext, label = \" %s \"];\n"
@@ -271,9 +272,18 @@ char * CreateAddInfo(size_t err_vec, ListDebugInfo debug_info)
     free(err_info_init);
     free(list_info);
 
-
-
-
-
     return add_info_init;
+}
+
+int WriteHTML (const char * HTML_fname, int dump_id, size_t err_vec, ListDebugInfo debug_info)
+{
+    assert(HTML_fname);
+
+    FILE * HTML_file = fopen(HTML_fname, "ab");
+
+    fprintf(HTML_file, "<img src=\"./graph_dump_%d.png\">", dump_id);
+
+    fclose(HTML_file);
+
+    return 0;
 }

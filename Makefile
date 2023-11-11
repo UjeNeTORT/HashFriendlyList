@@ -7,7 +7,7 @@ options = -O2 -Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloa
 DUMP = $(wildcard graph_dump/*.cpp)
 Main_files = *.cpp
 
-start: compile_dump compile_main exe run to_html open_html
+start: compile_dump compile_main exe run
 
 compile_dump:
 	g++ $(DUMP) -c $(options) $(debug)

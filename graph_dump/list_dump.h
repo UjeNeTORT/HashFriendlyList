@@ -23,9 +23,11 @@ int    ListDump       (const char * fname, const List * list, size_t err_vec, Li
 char * CreateVals     (const List * list, size_t size);
 char * CreateNodes    (const List * list, size_t size);
 char * CreateEdges    (const List * list, size_t size);
-char * CreateDotCode  (const List * list, const char * add_info);
+char * CreateDotCode  (const List * list);
 int    WriteDotCode   (const char * fname, const char * dot_code);
 
-char * CreateAddInfo(size_t err_vec, ListDebugInfo debug_info);
+char * CreateAddInfo  (size_t err_vec, ListDebugInfo debug_info);
+
+int WriteHTML         (const char * HTML_fname, int dump_id, size_t err_vec, ListDebugInfo debug_info);
 
 #endif // LIST_DUMP_H
