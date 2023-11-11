@@ -23,7 +23,7 @@
  * @note function is designed to increase size of the list so if new_size < size it would be a mistake and fucntion
  *       will return an error code
 */
-static ListReallocRes  ListReallocUp (List * list, int new_size);
+static ListReallocRes  ListReallocUp (List * list, int new_size, ListDebugInfo debug_info);
 
 List ListCtor (int size)
 {
@@ -113,7 +113,7 @@ ListReallocRes ListRealloc  (List * list, int new_size, ListDebugInfo debug_info
 
     if (new_size > list->size)
     {
-        ret_val = ListReallocUp(list, new_size);
+        ret_val = ListReallocUp(list, new_size, debug_info);
     }
     else if (new_size < list->size)
     {
@@ -461,7 +461,7 @@ int ListVerifyId (const List * list, int id, ListDebugInfo debug_info)
     return 0;
 }
 
-int ListPrintfErrCorrupted(ListDebugInfo debug_info)
+int ListPrintfErrCorruptedList(ListDebugInfo debug_info)
 {
     int ret_val = fprintf(stderr, "ERROR List %s called from %s (%d) is corrupted, aborting...\n", debug_info.list_name, debug_info.filename, debug_info.line);
 

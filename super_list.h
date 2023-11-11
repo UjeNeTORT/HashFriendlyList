@@ -38,7 +38,7 @@ const char * const DOT_DUMP_FILENAME = "graph.dot";
     if (err_vec != 0)                                                \
     {                                                                \
                                                                      \
-        PrintfErrCorruptedList(debug_info);                          \
+        ListPrintfErrCorruptedList(debug_info);                      \
         ListDump(DOT_DUMP_FILENAME, list, err_vec, debug_info);      \
         ListDtor(list);                                              \
         abort();                                                     \
@@ -115,7 +115,7 @@ struct ListDebugInfo
 /**
  * todo docs
 */
-int PrintfErrCorruptedList(ListDebugInfo debug_info);
+int ListPrintfErrCorruptedList(ListDebugInfo debug_info);
 
 /**
  * todo docs
