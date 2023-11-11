@@ -25,16 +25,6 @@
 #define PREV(index) list->prev[(index)]
 #define DATA(index) list->data[(index)]
 
-typedef enum {
-    SWP_NO_ERR = 0,
-    SWP_ERR    = 1,
-} ListSwapRes;
-
-/**
- * @warning not finished dont use
-*/
-static ListSwapRes ListElemSwap (List * list, int id_1, int id_2);
-
 /**
  * @brief increase size of list from size to new_size
  *
