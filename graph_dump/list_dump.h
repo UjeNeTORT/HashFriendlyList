@@ -26,6 +26,6 @@ char * CreateEdges    (const List * list, size_t size);
 char * CreateDotCode  (const List * list, const char * add_info);
 int    WriteDotCode (const char * fname, const char * dot_code);
 
-char * FormAddInfo(size_t err_vec);
+char * CreateAddInfo(size_t err_vec);
 
 #endif // LIST_DUMP_H
