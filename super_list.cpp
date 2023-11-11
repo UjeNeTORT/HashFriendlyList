@@ -77,9 +77,9 @@ int ListDtor (const List * list)
     return 0;
 }
 
-ListCopyRes ListCopy (List * list_dst, const List * list_src)
+ListCopyRes ListCopy (List * list_dst, const List * list_src, ListDebugInfo debug_info)
 {
-    VERIFY_LIST(list_src);
+    VERIFY_LIST(list_src, debug_info);
 
     if (!memcpy(list_dst->data, list_src->data, list_src->size * sizeof(elem_t)))
     {
@@ -98,14 +98,12 @@ ListCopyRes ListCopy (List * list_dst, const List * list_src)
 
     list_dst->fre = list_src->fre;
 
-    ON_DEBUG(VERIFY_LIST(list_dst));
-
     return CPY_NO_ERR;
 }
 
-ListReallocRes ListRealloc  (List * list, int new_size)
+ListReallocRes ListRealloc  (List * list, int new_size, ListDebugInfo debug_info)
 {
-    VERIFY_LIST(list);
+    VERIFY_LIST(list, debug_info);
 
     ListReallocRes ret_val = REALLC_NO_ERR;
 
@@ -126,15 +124,15 @@ ListReallocRes ListRealloc  (List * list, int new_size)
         ret_val = REALLC_FORBIDDEN;
     }
 
-    ON_DEBUG(VERIFY_LIST(list));
+    ON_DEBUG(VERIFY_LIST(list, debug_info));
 
     return ret_val;
 }
 
 static ListReallocRes
-ListReallocUp (List * list, int new_size)
+ListReallocUp (List * list, int new_size, ListDebugInfo debug_info)
 {
-    VERIFY_LIST(list);
+    VERIFY_LIST(list, debug_info);
 
     if (new_size <= list->size)
     {
@@ -177,7 +175,7 @@ ListReallocUp (List * list, int new_size)
 
     list->size = new_size;
 
-    ON_DEBUG(VERIFY_LIST(list));
+    ON_DEBUG(VERIFY_LIST(list, debug_info));
 
     return REALLC_NO_ERR;
 }
@@ -188,34 +186,34 @@ int ListMakeLinear (List * list)
 
     return -1;
 
-    VERIFY_LIST(list);
+    // VERIFY_LIST(list, debug_info);
 
-    List linear_list = ListCtor(list->size); //? create fresh list of the same size
-
-    int next_id  = 0;
-    int logic_id = 0;
-
-    while (next_id != list->prev[0])
-    {
-        next_id = NEXT(next_id);
-
-        ListInsertAfter(&linear_list, logic_id, DATA(next_id));
-
-        logic_id++;
-    }
-
-    ListDtor(list); //? good solution?
-
-    list = &linear_list;
-
-    ON_DEBUG(VERIFY_LIST(list));
-
-    return 0;
+    // List linear_list = ListCtor(list->size); //? create fresh list of the same size
+//
+    // int next_id  = 0;
+    // int logic_id = 0;
+//
+    // while (next_id != list->prev[0])
+    // {
+        // next_id = NEXT(next_id);
+//
+        // ListInsertAfter(&linear_list, logic_id, DATA(next_id));
+//
+        // logic_id++;
+    // }
+//
+    // ListDtor(list); //? good solution?
+//
+    // list = &linear_list;
+//
+    // ON_DEBUG(VERIFY_LIST(list, debug_info));
+//
+    // return 0;
 }
 
-elem_t ListIdFind (List * list, int id)
+elem_t ListIdFind (List * list, int id, ListDebugInfo debug_info)
 {
-    VERIFY_LIST(list);
+    VERIFY_LIST(list, debug_info);
 
     elem_t val = POISON;
 
@@ -224,14 +222,14 @@ elem_t ListIdFind (List * list, int id)
     else
         fprintf(stderr, "ListIdFind: invalid id %d\n", id);
 
-    ON_DEBUG(VERIFY_LIST(list));
+    ON_DEBUG(VERIFY_LIST(list, debug_info));
 
     return val;
 }
 
-int MegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToListValFind (List * list, elem_t val)
+int MegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToListValFind (List * list, elem_t val, ListDebugInfo debug_info)
 {
-    VERIFY_LIST(list);
+    VERIFY_LIST(list, debug_info);
 
     int id = -1; // not found
 
@@ -244,43 +242,43 @@ int MegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToListValFind (List * list,
         }
     }
 
-    ON_DEBUG(VERIFY_LIST(list));
+    ON_DEBUG(VERIFY_LIST(list, debug_info));
 
     return id;
 }
 
-int ListInsertBegin (List * list, elem_t val)
+int ListInsertBegin (List * list, elem_t val, ListDebugInfo debug_info)
 {
-    VERIFY_LIST(list);
+    VERIFY_LIST(list, debug_info);
 
-    int new_id = ListInsertAfter(list, 0, val);
+    int new_id = InsertAfterList(list, 0, val);
 
-    ON_DEBUG(VERIFY_LIST(list));
+    ON_DEBUG(VERIFY_LIST(list, debug_info));
 
     return new_id;  // where inserted value is
 }
 
-int ListInsertEnd (List * list, elem_t val)
+int ListInsertEnd (List * list, elem_t val, ListDebugInfo debug_info)
 {
-    VERIFY_LIST(list);
+    VERIFY_LIST(list, debug_info);
 
-    int new_id = ListInsertAfter(list, PREV(0), val);
+    int new_id = InsertAfterList(list, PREV(0), val);
 
-    ON_DEBUG(VERIFY_LIST(list));
+    ON_DEBUG(VERIFY_LIST(list, debug_info));
 
     return new_id;  // where inserted value is
 }
 
-int ListInsertAfter (List * list, int id, elem_t val)
+int ListInsertAfter (List * list, int id, elem_t val, ListDebugInfo debug_info)
 {
-    VERIFY_LIST(list);
-    VERIFY_ID(list, id);
+    VERIFY_LIST(list, debug_info);
+    VERIFY_ID(list, id, debug_info);
 
     if (list->fre == -1)
     {
         // if no room left - abort
         fprintf(stderr, "ListInsertAfter: no room left for insertion\n");
-        ABORT_LIST(list, -1);
+        ABORT_LIST(list, -1, debug_info);
     }
 
     int new_id = list->fre;
@@ -296,27 +294,27 @@ int ListInsertAfter (List * list, int id, elem_t val)
     PREV(new_id) = PREV(old_nxt);
     PREV(old_nxt) = new_id;
 
-    ON_DEBUG(VERIFY_LIST(list));
+    ON_DEBUG(VERIFY_LIST(list, debug_info));
 
     return new_id; // where inserted value is
 }
 
-int ListInsertBefore (List * list, int id, elem_t val)
+int ListInsertBefore (List * list, int id, elem_t val, ListDebugInfo debug_info)
 {
-    VERIFY_LIST(list);
-    VERIFY_ID(list, id);
+    VERIFY_LIST(list, debug_info);
+    VERIFY_ID(list, id, debug_info);
 
-    int new_id = ListInsertAfter(list, PREV(id), val);
+    int new_id = InsertAfterList(list, PREV(id), val);
 
-    ON_DEBUG(VERIFY_LIST(list));
+    ON_DEBUG(VERIFY_LIST(list, debug_info));
 
     return new_id;
 }
 
-elem_t ListIdDelete (List * list, int id)
+elem_t ListIdDelete (List * list, int id, ListDebugInfo debug_info)
 {
-    VERIFY_LIST(list);
-    VERIFY_ID(list, id);
+    VERIFY_LIST(list, debug_info);
+    VERIFY_ID(list, id, debug_info);
 
     int prev = PREV(id);
     int next = NEXT(id);
@@ -331,23 +329,23 @@ elem_t ListIdDelete (List * list, int id)
     NEXT(id) = list->fre;
     list->fre = id;
 
-    ON_DEBUG(VERIFY_LIST(list));
+    ON_DEBUG(VERIFY_LIST(list, debug_info));
 
     return deleted_el;
 }
 
-int ListValDelete (List * list, elem_t val)
+int ListValDelete (List * list, elem_t val, ListDebugInfo debug_info)
 {
-    VERIFY_LIST(list);
+    VERIFY_LIST(list, debug_info);
 
-    int id = MegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToListValFind(list, val);
+    int id = FindValMegaSuperSlowTenLoopsTwentyDrunkenEngineersTryingToList(list, val);
 
     if (id != -1)
     {
-        ListIdDelete(list, id);
+        DeleteIdList(list, id);
     }
 
-    ON_DEBUG(VERIFY_LIST(list));
+    ON_DEBUG(VERIFY_LIST(list, debug_info));
 
     return id;
 }
@@ -442,9 +440,9 @@ size_t ListVerifier (const List * list)
     return err_vec;
 }
 
-int ListVerifyId (const List * list, int id)
+int ListVerifyId (const List * list, int id, ListDebugInfo debug_info)
 {
-    VERIFY_LIST(list);
+    VERIFY_LIST(list, debug_info);
 
     if (id < 0)
     {
@@ -461,4 +459,11 @@ int ListVerifyId (const List * list, int id)
     }
 
     return 0;
+}
+
+int ListPrintfErrCorrupted(ListDebugInfo debug_info)
+{
+    int ret_val = fprintf(stderr, "ERROR List %s called from %s (%d) is corrupted, aborting...\n", debug_info.list_name, debug_info.filename, debug_info.line);
+
+    return ret_val;
 }

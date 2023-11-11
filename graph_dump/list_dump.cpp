@@ -9,7 +9,7 @@ const int DEFAULT_BUF_SIZE = 1000;
 #include "../super_list.h"
 #include "list_dump.h"
 
-int ListDump (const char * fname, const List * list, size_t err_vec)
+int ListDump (const char * fname, const List * list, size_t err_vec, ListDebugInfo debug_info)
 {
     assert(fname);
     assert(list);

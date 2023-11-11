@@ -19,12 +19,12 @@ typedef enum {
 const char * const DUMP_FNAME = "list_dump.svg";
 const int STYLE_TAG_SIZE = 1000;
 
-int    ListDump     (const char * fname, const List * list, size_t err_vec);
+int    ListDump       (const char * fname, const List * list, size_t err_vec, ListDebugInfo debug_info);
 char * CreateVals     (const List * list, size_t size);
 char * CreateNodes    (const List * list, size_t size);
 char * CreateEdges    (const List * list, size_t size);
 char * CreateDotCode  (const List * list, const char * add_info);
-int    WriteDotCode (const char * fname, const char * dot_code);
+int    WriteDotCode   (const char * fname, const char * dot_code);
 
 char * CreateAddInfo(size_t err_vec);
 
