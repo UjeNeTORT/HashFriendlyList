@@ -49,6 +49,20 @@ const char * const DOT_DUMP_FILENAME = "graph.dot";
     }                                                                \
 }
 
+/**
+ * @brief abort if id not allowed for list, otherwise do nothing
+ *
+ * @param list list
+ * @param id   id to get checked
+ *
+ * @warning abort inside
+*/
+#define VERIFY_ID(list, id)      \
+{                                \
+    if (ListVerifyId(list, id))  \
+        ABORT_LIST(list, -1);    \
+}
+
 const int POISON = 0xD00D1E;
 
 typedef int elem_t;

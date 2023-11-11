@@ -6,20 +6,6 @@
 #include "super_list.h"
 #include "graph_dump/list_dump.h"
 
-/**
- * @brief abort if id not allowed for list, otherwise do nothing
- *
- * @param list list
- * @param id   id to get checked
- *
- * @warning abort inside
-*/
-#define VERIFY_ID(list, id)      \
-{                                \
-    if (ListVerifyId(list, id))  \
-        ABORT_LIST(list, -1);    \
-}
-
 // DSL
 #define NEXT(index) list->next[(index)]
 #define PREV(index) list->prev[(index)]
