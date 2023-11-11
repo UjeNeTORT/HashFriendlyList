@@ -25,11 +25,6 @@
 */
 static ListReallocRes  ListReallocUp (List * list, int new_size);
 
-/**
- * todo docs
-*/
-static int ListVerifyId  (const List * list, int id);
-
 List ListCtor (int size)
 {
     if (size <= 0)
@@ -448,7 +443,7 @@ size_t ListVerifier (const List * list)
     return err_vec;
 }
 
-static int ListVerifyId (const List * list, int id)
+int ListVerifyId (const List * list, int id)
 {
     VERIFY_LIST(list);
 
@@ -461,7 +456,7 @@ static int ListVerifyId (const List * list, int id)
 
     if (id >= list->size)
     {
-        fprintf(stderr, "List id %d > list size\n", id);
+        fprintf(stderr, "List id %d >= list size\n", id);
 
         return 1;
     }

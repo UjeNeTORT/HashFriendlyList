@@ -96,6 +96,22 @@ struct List {
 size_t ListVerifier (const List * list);
 
 /**
+ * @brief check if list id "id" is "addressable"
+ *
+ * @param list list
+ * @param id   id to get checked
+ *
+ * @return 0 if id is "addressable" for list
+ * @return 1 if id is wrong (< 0 or >= size)
+ *
+ * @example if we pass id = -1 (ListInsertAfter(list, -1 , 111)) ListVerifyId returns -> 1 (error code)
+ *
+ * @note this func is called every time inside functions to which we pass id.
+ * @warning it is usually called inside VERIFY_ID macros, which has abort inside
+*/
+int ListVerifyId  (const List * list, int id);
+
+/**
  * @brief create new list of size "size"
  *
  * @param size desired size of list
