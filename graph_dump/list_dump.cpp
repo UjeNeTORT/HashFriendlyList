@@ -14,7 +14,7 @@ int ListDump (const char * fname, const List * list, size_t err_vec, ListDebugIn
     assert(fname);
     assert(list);
 
-    char * add_info = CreateAddInfo(err_vec);
+    char * add_info = CreateAddInfo(err_vec, debug_info);
     char * dot_code = CreateDotCode(list, (const char *) add_info);
 
     WriteDotCode(fname, (const char *) dot_code);
@@ -193,7 +193,7 @@ int WriteDotCode (const char * fname, const char * dot_code)
     return ret_code;
 }
 
-char * CreateAddInfo(size_t err_vec)
+char * CreateAddInfo(size_t err_vec, ListDebugInfo debug_info)
 {
     char * add_info = (char *) calloc(1000, sizeof(char));
     char * add_info_init = add_info;
@@ -204,11 +204,11 @@ char * CreateAddInfo(size_t err_vec)
 
     int symbs = 0;
 
-    sprintf(add_info, "subgraph cluster_add_info_%d{\n"
-                      "node_add_info [shape = plaintext, label = \" %s \"];\n"
-                      "}\n%n", rand(), asctime(loc_time), &symbs);
-
-    add_info += symbs;
+    // sprintf(add_info, "subgraph cluster_add_info_%d{\n"
+                    //   "node_add_info [shape = plaintext, label = \" %s \"];\n"
+                    //   "}\n%n", rand(), asctime(loc_time), &symbs);
+//
+    // add_info += symbs;
 
     char * err_info = (char *) calloc(STYLE_TAG_SIZE, sizeof(char));
     char * err_info_init = err_info;
@@ -259,13 +259,21 @@ char * CreateAddInfo(size_t err_vec)
         err_info += symbs;
     }
 
-    if (err_info != err_info_init)
-    {
-        sprintf(add_info, "subgraph cluster_err_info{\n"
-                      "node_err_info [shape = plaintext, label = \" %s \"];\n}\n", err_info_init);
-    }
+    char * list_info = (char *) calloc(STYLE_TAG_SIZE, sizeof(char));
+    sprintf(list_info, "List \\\"%s\\\" called from %s (%d)\n", debug_info.list_name, debug_info.filename, debug_info.line);
+
+    sprintf(add_info, "subgraph cluster_add_info {\n"
+                  "node_err_info [shape = plaintext, label = \" %s \"];\n"
+                  "node_dbg_info [shape = plaintext, label = \" %s \"];\n"
+                  "node_add_info [shape = plaintext, label = \" %s \"];\n}%n", err_info_init, list_info, asctime(loc_time), &symbs);
+    add_info += symbs;
 
     free(err_info_init);
+    free(list_info);
+
+
+
+
 
     return add_info_init;
 }
