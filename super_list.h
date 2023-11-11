@@ -2,7 +2,6 @@
 #define SUPER_LIST_H
 
 #include <stdio.h>
-#include "microhashlib/my_hash.h"
 
 const char * const DOT_DUMP_FILENAME = "graph.dot";
 

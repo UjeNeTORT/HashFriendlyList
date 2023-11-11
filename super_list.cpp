@@ -216,7 +216,6 @@ int ListMakeLinear (List * list)
 elem_t ListIdFind (List * list, int id)
 {
     VERIFY_LIST(list);
-    VERIFY_ID(list, id);
 
     elem_t val = POISON;
 
